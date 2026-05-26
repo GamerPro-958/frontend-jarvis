@@ -1,14 +1,972 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="jarvis.png" type="image/png" />
   <title>J.A.R.V.I.S.</title>
   <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       🌿 ECO-FRIENDLY MOBILE-FIRST CSS
+       - Reduced animations (saves battery)
+       - Nature-inspired green palette
+       - Minimal shadows/glows (less GPU usage)
+       - Mobile-first responsive design
+       - Supports prefers-reduced-motion
+       ═══════════════════════════════════════════════════════════════════ */
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* 🌿 Eco-friendly green palette */
+      --eco-primary: #2d6a4f;
+      --eco-primary-light: #40916c;
+      --eco-primary-dim: #1b4332;
+      --eco-bg: #0d1f17;
+      --eco-surface: rgba(45, 106, 79, 0.08);
+      --eco-border: rgba(45, 106, 79, 0.2);
+      --text-primary: #d8f3dc;
+      --text-muted: #74a892;
+      --danger: #e07a5f;
+      --success: #52b788;
+      --warning: #e9c46a;
+    }
+
+    /* 🔋 Disable animations for reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--eco-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 🌿 Subtle leaf pattern - static, no animation */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 80%, rgba(45, 106, 79, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(45, 106, 79, 0.02) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── BOOT OVERLAY ─── */
+    #boot-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--eco-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.6s ease;
+    }
+
+    #boot-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #boot-text {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(0.75rem, 3vw, 1rem);
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      color: var(--eco-primary-light);
+      text-indent: 0.3em;
+    }
+
+    /* ─── AUTH SCREEN ─── */
+    #auth-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--eco-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.4s ease;
+      padding: 16px;
+    }
+
+    #auth-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .auth-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 24px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .auth-reactor {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 2px solid var(--eco-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: var(--eco-surface);
+    }
+
+    .auth-reactor::before {
+      content: '🌿';
+      font-size: 32px;
+    }
+
+    .auth-reactor::after {
+      display: none;
+    }
+
+    .auth-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--eco-primary-light);
+      text-align: center;
+    }
+
+    .auth-subtitle {
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .auth-message {
+      font-size: 14px;
+      color: var(--text-primary);
+      text-align: center;
+      max-width: 100%;
+      line-height: 1.6;
+    }
+
+    .auth-message.error {
+      color: var(--danger);
+    }
+
+    .auth-message.success {
+      color: var(--success);
+    }
+
+    .auth-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    #auth-input {
+      width: 100%;
+      padding: 16px;
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #auth-input:focus {
+      border-color: var(--eco-primary);
+    }
+
+    #auth-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .auth-btn-group {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--eco-primary);
+      border: none;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .auth-btn:hover,
+    .auth-btn:active {
+      background: var(--eco-primary-light);
+    }
+
+    .auth-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .auth-btn-mic {
+      width: 100%;
+      padding: 16px;
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      border-radius: 12px;
+      color: var(--eco-primary-light);
+      font-size: 18px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .auth-btn-mic:hover,
+    .auth-btn-mic:active {
+      border-color: var(--eco-primary);
+    }
+
+    .auth-btn-mic.listening {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .auth-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .auth-status.listening {
+      color: var(--eco-primary-light);
+    }
+
+    .auth-status.error {
+      color: var(--danger);
+    }
+
+    .auth-status.success {
+      color: var(--success);
+    }
+
+    /* ─── MAIN APP ─── */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--eco-border);
+      background: rgba(13, 31, 23, 0.95);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .arc-reactor {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--eco-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--eco-surface);
+      flex-shrink: 0;
+    }
+
+    .arc-reactor::before {
+      content: '🌱';
+      font-size: 16px;
+    }
+
+    .arc-reactor::after {
+      display: none;
+    }
+
+    .logo-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      color: var(--eco-primary-light);
+    }
+
+    .logo-sub {
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+      display: none;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      flex-shrink: 0;
+    }
+
+    .status-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: none;
+    }
+
+    .btn-icon {
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      color: var(--eco-primary-light);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s;
+      font-size: 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-icon:hover,
+    .btn-icon:active {
+      border-color: var(--eco-primary);
+    }
+
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .chat-area::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .chat-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-area::-webkit-scrollbar-thumb {
+      background: var(--eco-border);
+      border-radius: 2px;
+    }
+
+    .message {
+      max-width: 85%;
+      margin-bottom: 12px;
+    }
+
+    .message.user {
+      margin-left: auto;
+    }
+
+    .message.assistant {
+      margin-right: auto;
+    }
+
+    .msg-bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .user .msg-bubble {
+      background: var(--eco-primary);
+      border-radius: 16px 16px 4px 16px;
+      color: var(--text-primary);
+    }
+
+    .assistant .msg-bubble {
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      border-radius: 16px 16px 16px 4px;
+      color: var(--text-primary);
+    }
+
+    .msg-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .user .msg-meta {
+      justify-content: flex-end;
+    }
+
+    .skill-badge {
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      color: var(--eco-primary-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .thinking {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      max-width: 160px;
+    }
+
+    .thinking-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .thinking-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--eco-primary-light);
+      opacity: 0.4;
+    }
+
+    .thinking-dots span:nth-child(1) {
+      animation: ecoFade 1.2s ease-in-out infinite;
+    }
+
+    .thinking-dots span:nth-child(2) {
+      animation: ecoFade 1.2s ease-in-out 0.2s infinite;
+    }
+
+    .thinking-dots span:nth-child(3) {
+      animation: ecoFade 1.2s ease-in-out 0.4s infinite;
+    }
+
+    @keyframes ecoFade {
+
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .thinking-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 20px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .welcome-reactor {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--eco-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--eco-surface);
+    }
+
+    .welcome-reactor::before {
+      content: '🌿';
+      font-size: 32px;
+    }
+
+    .welcome-reactor::after {
+      display: none;
+    }
+
+    .welcome h2 {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      color: var(--eco-primary-light);
+    }
+
+    .welcome p {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 300px;
+      line-height: 1.6;
+    }
+
+    .mood-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .mood-emoji {
+      font-size: 14px;
+    }
+
+    .search-results {
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 13px;
+    }
+
+    .search-result-item {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 3px solid var(--eco-primary);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .search-result-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .search-result-item:hover,
+    .search-result-item:active {
+      background: var(--eco-surface);
+    }
+
+    .search-result-title {
+      color: var(--eco-primary-light);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .search-result-desc {
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .search-result-url {
+      color: var(--text-muted);
+      font-size: 10px;
+      margin-top: 6px;
+      opacity: 0.7;
+    }
+
+    .input-bar {
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--eco-border);
+      background: rgba(13, 31, 23, 0.98);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .input-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #chatInput {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    #chatInput::placeholder {
+      color: var(--text-muted);
+    }
+
+    #chatInput:focus {
+      border-color: var(--eco-primary);
+    }
+
+    .btn-send {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--eco-primary);
+      border: none;
+      color: var(--text-primary);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-send:hover,
+    .btn-send:active {
+      background: var(--eco-primary-light);
+    }
+
+    .btn-send:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-mic {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      color: var(--eco-primary-light);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-mic:hover,
+    .btn-mic:active {
+      border-color: var(--eco-primary);
+    }
+
+    .btn-mic.listening {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .tts-indicator {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      user-select: none;
+      text-transform: uppercase;
+      padding: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tts-indicator.active {
+      color: var(--eco-primary-light);
+    }
+
+    .wake-word-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--eco-surface);
+      border-bottom: 1px solid var(--eco-border);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .wake-word-bar.active {
+      background: rgba(45, 106, 79, 0.12);
+      color: var(--eco-primary-light);
+    }
+
+    .wake-word-bar.heard {
+      background: rgba(82, 183, 136, 0.12);
+      color: var(--success);
+    }
+
+    .wake-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .wake-word-bar.active .wake-dot {
+      background: var(--eco-primary-light);
+    }
+
+    .wake-word-bar.heard .wake-dot {
+      background: var(--success);
+    }
+
+    .btn-wake {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--eco-surface);
+      border: 1px solid var(--eco-border);
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s;
+      position: relative;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-wake:hover,
+    .btn-wake:active {
+      border-color: var(--eco-primary);
+      color: var(--eco-primary-light);
+    }
+
+    .btn-wake.active {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .btn-wake.active::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .wake-activation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(82, 183, 136, 0.08);
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0;
+      animation: ecoFlash 0.4s ease-out forwards;
+    }
+
+    @keyframes ecoFlash {
+      0% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       📱 RESPONSIVE BREAKPOINTS - MOBILE FIRST
+       ═══════════════════════════════════════════════════════════════════ */
+
+    /* Small tablets and up */
+    @media (min-width: 480px) {
+      .auth-container {
+        padding: 32px;
+      }
+
+      .auth-input-group {
+        flex-direction: row;
+      }
+
+      .auth-btn-mic {
+        width: 56px;
+      }
+
+      .auth-btn-group {
+        flex-direction: row;
+      }
+
+      .auth-btn {
+        width: auto;
+        flex: 1;
+      }
+
+      .logo-sub {
+        display: block;
+      }
+    }
+
+    /* Tablets and up */
+    @media (min-width: 768px) {
+      .header {
+        padding: 16px 24px;
+      }
+
+      .chat-area {
+        padding: 24px;
+      }
+
+      .input-bar {
+        padding: 16px 24px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        gap: 12px;
+      }
+
+      .message {
+        max-width: 75%;
+      }
+
+      .logo-text {
+        font-size: 20px;
+        letter-spacing: 4px;
+      }
+
+      .status-label {
+        display: block;
+      }
+
+      .arc-reactor {
+        width: 44px;
+        height: 44px;
+      }
+
+      .arc-reactor::before {
+        font-size: 20px;
+      }
+
+      .welcome-reactor {
+        width: 100px;
+        height: 100px;
+      }
+
+      .welcome-reactor::before {
+        font-size: 40px;
+      }
+
+      .welcome h2 {
+        font-size: 18px;
+        letter-spacing: 4px;
+      }
+
+      .welcome p {
+        max-width: 400px;
+      }
+    }
+
+    /* Desktop */
+    @media (min-width: 1024px) {
+      .message {
+        max-width: 65%;
+      }
+    }
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="jarvis.png" type="image/png" />
+  <title>J.A.R.V.I.S.</title>
+  <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600&display=swap');
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     :root {
       --arc-blue: #00d4ff;
@@ -36,10 +994,13 @@
     body::before {
       content: '';
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background:
-        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
       background-size: 60px 60px;
       animation: gridMove 20s linear infinite;
       pointer-events: none;
@@ -47,55 +1008,69 @@
     }
 
     @keyframes gridMove {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(60px, 60px); }
+      0% {
+        transform: translate(0, 0);
+      }
+
+      100% {
+        transform: translate(60px, 60px);
+      }
     }
 
     body::after {
       content: '';
       position: fixed;
-      top: 50%; left: 50%;
-      width: 800px; height: 800px;
+      top: 50%;
+      left: 50%;
+      width: 800px;
+      height: 800px;
       transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
     /* ─── BOOT OVERLAY ─── */
     #boot-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 99999;
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 1.2s ease;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 1.2s ease;
     }
 
     #boot-overlay.fade-out {
-        opacity: 0;
-        pointer-events: none;
+      opacity: 0;
+      pointer-events: none;
     }
 
     #boot-text {
-        font-family: 'Orbitron', sans-serif;
-        font-size: clamp(0.8rem, 1.4vw, 1.3rem);
-        letter-spacing: 0.5em;
-        color: #00d4ff;
-        animation: bootFlicker 0.15s ease-in-out 3;
-        text-indent: 0.5em;
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(0.8rem, 1.4vw, 1.3rem);
+      letter-spacing: 0.5em;
+      color: #00d4ff;
+      animation: bootFlicker 0.15s ease-in-out 3;
+      text-indent: 0.5em;
     }
 
     @keyframes bootFlicker {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.3; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
     }
 
     /* ─── AUTH SCREEN ─── */
@@ -131,10 +1106,13 @@
     }
 
     .auth-reactor {
-      width: 180px; height: 180px;
+      width: 180px;
+      height: 180px;
       border-radius: 50%;
       border: 3px solid var(--arc-blue);
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
       box-shadow: 0 0 80px var(--arc-glow), inset 0 0 60px var(--arc-glow);
       animation: authReactorPulse 2.5s ease-in-out infinite;
@@ -142,7 +1120,8 @@
 
     .auth-reactor::before {
       content: '';
-      width: 80px; height: 80px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: var(--arc-blue);
       box-shadow: 0 0 40px var(--arc-blue), 0 0 80px var(--arc-glow);
@@ -151,20 +1130,33 @@
     .auth-reactor::after {
       content: '';
       position: absolute;
-      width: 140px; height: 140px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
       border: 2px solid rgba(0, 212, 255, 0.3);
       animation: authReactorSpin 6s linear infinite;
     }
 
     @keyframes authReactorPulse {
-      0%, 100% { box-shadow: 0 0 80px var(--arc-glow), inset 0 0 60px var(--arc-glow); }
-      50% { box-shadow: 0 0 120px var(--arc-glow), inset 0 0 80px var(--arc-glow); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 80px var(--arc-glow), inset 0 0 60px var(--arc-glow);
+      }
+
+      50% {
+        box-shadow: 0 0 120px var(--arc-glow), inset 0 0 80px var(--arc-glow);
+      }
     }
 
     @keyframes authReactorSpin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .auth-title {
@@ -287,8 +1279,15 @@
     }
 
     @keyframes authMicPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
-      50% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+      }
     }
 
     .auth-status {
@@ -338,10 +1337,13 @@
     }
 
     .arc-reactor {
-      width: 44px; height: 44px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       border: 2px solid var(--arc-blue);
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
       box-shadow: 0 0 20px var(--arc-glow), inset 0 0 15px var(--arc-glow);
       animation: reactorPulse 3s ease-in-out infinite;
@@ -349,7 +1351,8 @@
 
     .arc-reactor::before {
       content: '';
-      width: 16px; height: 16px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: var(--arc-blue);
       box-shadow: 0 0 10px var(--arc-blue), 0 0 30px var(--arc-glow);
@@ -358,20 +1361,33 @@
     .arc-reactor::after {
       content: '';
       position: absolute;
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       border: 1px solid rgba(0, 212, 255, 0.4);
       animation: reactorSpin 8s linear infinite;
     }
 
     @keyframes reactorPulse {
-      0%, 100% { box-shadow: 0 0 20px var(--arc-glow), inset 0 0 15px var(--arc-glow); }
-      50% { box-shadow: 0 0 35px var(--arc-glow), inset 0 0 25px var(--arc-glow); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px var(--arc-glow), inset 0 0 15px var(--arc-glow);
+      }
+
+      50% {
+        box-shadow: 0 0 35px var(--arc-glow), inset 0 0 25px var(--arc-glow);
+      }
     }
 
     @keyframes reactorSpin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .logo-text {
@@ -398,7 +1414,8 @@
     }
 
     .status-dot {
-      width: 8px; height: 8px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--success);
       box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
@@ -406,8 +1423,15 @@
     }
 
     @keyframes statusBlink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
     }
 
     .status-label {
@@ -421,10 +1445,13 @@
       background: var(--arc-surface);
       border: 1px solid var(--arc-border);
       color: var(--arc-blue-dim);
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border-radius: 8px;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.3s;
       font-size: 16px;
     }
@@ -442,9 +1469,18 @@
       scroll-behavior: smooth;
     }
 
-    .chat-area::-webkit-scrollbar { width: 4px; }
-    .chat-area::-webkit-scrollbar-track { background: transparent; }
-    .chat-area::-webkit-scrollbar-thumb { background: var(--arc-border); border-radius: 2px; }
+    .chat-area::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chat-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-area::-webkit-scrollbar-thumb {
+      background: var(--arc-border);
+      border-radius: 2px;
+    }
 
     .message {
       max-width: 75%;
@@ -453,8 +1489,15 @@
     }
 
     @keyframes messageIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .message.user {
@@ -474,15 +1517,15 @@
     }
 
     .user .msg-bubble {
-      background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05));
-      border: 1px solid rgba(0,212,255,0.25);
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.05));
+      border: 1px solid rgba(0, 212, 255, 0.25);
       border-top-right-radius: 4px;
       color: var(--text-primary);
     }
 
     .assistant .msg-bubble {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-top-left-radius: 4px;
       color: var(--text-primary);
     }
@@ -496,11 +1539,13 @@
       color: var(--text-muted);
     }
 
-    .user .msg-meta { justify-content: flex-end; }
+    .user .msg-meta {
+      justify-content: flex-end;
+    }
 
     .skill-badge {
-      background: rgba(0,212,255,0.1);
-      border: 1px solid rgba(0,212,255,0.2);
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.2);
       padding: 2px 8px;
       border-radius: 4px;
       font-size: 10px;
@@ -523,18 +1568,34 @@
     }
 
     .thinking-dots span {
-      width: 6px; height: 6px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--arc-blue);
       animation: dotPulse 1.4s ease-in-out infinite;
     }
 
-    .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+    .thinking-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .thinking-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
 
     @keyframes dotPulse {
-      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-      40% { opacity: 1; transform: scale(1.2); }
+
+      0%,
+      80%,
+      100% {
+        opacity: 0.2;
+        transform: scale(0.8);
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
     }
 
     .thinking-label {
@@ -554,10 +1615,13 @@
     }
 
     .welcome-reactor {
-      width: 120px; height: 120px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       border: 3px solid var(--arc-blue);
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
       box-shadow: 0 0 60px var(--arc-glow), inset 0 0 40px var(--arc-glow);
       animation: reactorPulse 3s ease-in-out infinite;
@@ -565,7 +1629,8 @@
 
     .welcome-reactor::before {
       content: '';
-      width: 50px; height: 50px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: var(--arc-blue);
       box-shadow: 0 0 30px var(--arc-blue), 0 0 60px var(--arc-glow);
@@ -574,7 +1639,8 @@
     .welcome-reactor::after {
       content: '';
       position: absolute;
-      width: 90px; height: 90px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
       border: 1.5px solid rgba(0, 212, 255, 0.3);
       animation: reactorSpin 6s linear infinite;
@@ -601,7 +1667,7 @@
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
-      background: rgba(0,212,255,0.08);
+      background: rgba(0, 212, 255, 0.08);
       border: 1px solid var(--arc-border);
       border-radius: 8px;
       font-size: 12px;
@@ -613,7 +1679,7 @@
     }
 
     .search-results {
-      background: rgba(0,212,255,0.08);
+      background: rgba(0, 212, 255, 0.08);
       border: 1px solid var(--arc-border);
       border-radius: 8px;
       padding: 12px;
@@ -624,7 +1690,7 @@
     .search-result-item {
       padding: 10px;
       margin-bottom: 10px;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.3);
       border-left: 3px solid var(--arc-blue);
       border-radius: 4px;
       cursor: pointer;
@@ -632,7 +1698,7 @@
     }
 
     .search-result-item:hover {
-      background: rgba(0,212,255,0.1);
+      background: rgba(0, 212, 255, 0.1);
       border-left-color: var(--success);
       transform: translateX(5px);
     }
@@ -696,14 +1762,17 @@
     }
 
     .btn-send {
-      width: 48px; height: 48px;
+      width: 48px;
+      height: 48px;
       border-radius: 12px;
       background: linear-gradient(135deg, var(--arc-blue), var(--arc-blue-dim));
       border: none;
       color: var(--arc-bg);
       font-size: 20px;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.3s;
       box-shadow: 0 0 20px var(--arc-glow);
     }
@@ -720,14 +1789,17 @@
     }
 
     .btn-mic {
-      width: 48px; height: 48px;
+      width: 48px;
+      height: 48px;
       border-radius: 12px;
       background: var(--arc-surface);
       border: 1px solid var(--arc-border);
       color: var(--arc-blue-dim);
       font-size: 20px;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.3s;
     }
 
@@ -743,8 +1815,15 @@
     }
 
     @keyframes micPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
-      50% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+      }
     }
 
     .tts-indicator {
@@ -786,7 +1865,8 @@
     }
 
     .wake-dot {
-      width: 6px; height: 6px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--text-muted);
       transition: all 0.4s;
@@ -800,23 +1880,33 @@
 
     .wake-word-bar.heard .wake-dot {
       background: var(--success);
-      box-shadow: 0 0 8px rgba(0,255,136,0.5);
+      box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
     }
 
     @keyframes wakePulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
+
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 1;
+      }
     }
 
     .btn-wake {
-      width: 48px; height: 48px;
+      width: 48px;
+      height: 48px;
       border-radius: 12px;
       background: var(--arc-surface);
       border: 1px solid var(--arc-border);
       color: var(--text-muted);
       font-size: 16px;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.3s;
       position: relative;
     }
@@ -829,23 +1919,28 @@
     .btn-wake.active {
       border-color: var(--success);
       color: var(--success);
-      box-shadow: 0 0 15px rgba(0,255,136,0.2);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
     }
 
     .btn-wake.active::after {
       content: '';
       position: absolute;
-      top: -2px; right: -2px;
-      width: 8px; height: 8px;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--success);
-      box-shadow: 0 0 6px rgba(0,255,136,0.6);
+      box-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
     }
 
     .wake-activation {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(circle at center, rgba(0,255,136,0.08) 0%, transparent 60%);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(0, 255, 136, 0.08) 0%, transparent 60%);
       pointer-events: none;
       z-index: 100;
       opacity: 0;
@@ -853,29 +1948,680 @@
     }
 
     @keyframes wakeFlash {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
+      0% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
     }
 
-    @media (max-width: 600px) {
-      .message { max-width: 90%; }
-      .header { padding: 12px 16px; }
-      .input-bar { padding: 12px 16px; }
-      .logo-text { font-size: 18px; letter-spacing: 4px; }
+    /* ═══════════════════════════════════════════════════════════════════
+       MOBILE-FIRST RESPONSIVE ENHANCEMENTS
+       ═══════════════════════════════════════════════════════════════════ */
+
+    /* Base mobile optimizations */
+    body {
+      height: 100vh;
+      height: 100dvh;
+      /* Dynamic viewport for mobile browsers */
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      height: 100vh;
+      height: 100dvh;
+    }
+
+    /* Safe area support for notched devices */
+    .input-bar {
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+
+    /* Smooth mobile scrolling */
+    .chat-area {
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Prevent iOS zoom on input focus */
+    #chatInput,
+    #auth-input {
+      font-size: 16px;
+    }
+
+    /* ─── SMALL MOBILE (< 360px) ─── */
+    @media (max-width: 359px) {
+      .auth-container {
+        padding: 20px 16px;
+        gap: 20px;
+      }
+
+      .auth-reactor {
+        width: 100px;
+        height: 100px;
+      }
+
+      .auth-reactor::before {
+        width: 45px;
+        height: 45px;
+      }
+
+      .auth-reactor::after {
+        width: 80px;
+        height: 80px;
+      }
+
+      .auth-title {
+        font-size: 18px;
+        letter-spacing: 3px;
+      }
+
+      .auth-subtitle {
+        font-size: 11px;
+        letter-spacing: 1.5px;
+      }
+
+      .auth-message {
+        font-size: 13px;
+      }
+
+      .auth-input-group {
+        flex-direction: column;
+      }
+
+      .auth-btn-mic {
+        width: 100%;
+        height: 44px;
+      }
+
+      .header {
+        padding: 10px 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .header-left {
+        gap: 10px;
+      }
+
+      .arc-reactor {
+        width: 32px;
+        height: 32px;
+      }
+
+      .arc-reactor::before {
+        width: 12px;
+        height: 12px;
+      }
+
+      .arc-reactor::after {
+        width: 24px;
+        height: 24px;
+      }
+
+      .logo-text {
+        font-size: 14px;
+        letter-spacing: 2px;
+      }
+
+      .logo-sub {
+        display: none;
+      }
+
+      .header-right {
+        gap: 6px;
+      }
+
+      .mood-indicator {
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+
+      .mood-emoji {
+        font-size: 12px;
+      }
+
+      .status-label {
+        display: none;
+      }
+
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+
+      .chat-area {
+        padding: 12px;
+      }
+
+      .message {
+        max-width: 95%;
+      }
+
+      .msg-bubble {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      .welcome-reactor {
+        width: 80px;
+        height: 80px;
+      }
+
+      .welcome-reactor::before {
+        width: 35px;
+        height: 35px;
+      }
+
+      .welcome-reactor::after {
+        width: 60px;
+        height: 60px;
+      }
+
+      .welcome h2 {
+        font-size: 14px;
+        letter-spacing: 4px;
+      }
+
+      .welcome p {
+        font-size: 12px;
+        padding: 0 10px;
+      }
+
+      .input-bar {
+        padding: 10px 12px;
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+        gap: 8px;
+      }
+
+      #chatInput {
+        padding: 12px 14px;
+      }
+
+      .btn-send,
+      .btn-mic,
+      .btn-wake {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+      }
+
+      .wake-word-bar {
+        font-size: 9px;
+        padding: 5px 8px;
+        letter-spacing: 1px;
+      }
+
+      .tts-indicator {
+        font-size: 9px;
+      }
+    }
+
+    /* ─── MOBILE (360px - 480px) ─── */
+    @media (min-width: 360px) and (max-width: 480px) {
+      .auth-container {
+        padding: 24px 20px;
+        gap: 24px;
+      }
+
+      .auth-reactor {
+        width: 120px;
+        height: 120px;
+      }
+
+      .auth-reactor::before {
+        width: 55px;
+        height: 55px;
+      }
+
+      .auth-reactor::after {
+        width: 95px;
+        height: 95px;
+      }
+
+      .auth-title {
+        font-size: 20px;
+        letter-spacing: 4px;
+      }
+
+      .auth-subtitle {
+        font-size: 12px;
+        letter-spacing: 2px;
+      }
+
+      .auth-message {
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .auth-input-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .auth-btn-mic {
+        width: 100%;
+        height: 48px;
+      }
+
+      #auth-input {
+        padding: 14px 16px;
+      }
+
+      .header {
+        padding: 12px 16px;
+      }
+
+      .header-left {
+        gap: 12px;
+      }
+
+      .arc-reactor {
+        width: 36px;
+        height: 36px;
+      }
+
+      .arc-reactor::before {
+        width: 14px;
+        height: 14px;
+      }
+
+      .arc-reactor::after {
+        width: 28px;
+        height: 28px;
+      }
+
+      .logo-text {
+        font-size: 16px;
+        letter-spacing: 3px;
+      }
+
+      .logo-sub {
+        font-size: 8px;
+        letter-spacing: 2px;
+        display: block;
+      }
+
+      .header-right {
+        gap: 8px;
+      }
+
+      .mood-indicator {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+
+      .status-label {
+        display: none;
+      }
+
+      .btn-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .chat-area {
+        padding: 16px;
+      }
+
+      .message {
+        max-width: 90%;
+        margin-bottom: 12px;
+      }
+
+      .msg-bubble {
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+
+      .welcome {
+        gap: 20px;
+        padding: 20px;
+      }
+
+      .welcome-reactor {
+        width: 90px;
+        height: 90px;
+      }
+
+      .welcome-reactor::before {
+        width: 40px;
+        height: 40px;
+      }
+
+      .welcome-reactor::after {
+        width: 70px;
+        height: 70px;
+      }
+
+      .welcome h2 {
+        font-size: 15px;
+        letter-spacing: 5px;
+      }
+
+      .welcome p {
+        font-size: 13px;
+        max-width: 280px;
+      }
+
+      .input-bar {
+        padding: 12px 16px;
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        gap: 10px;
+      }
+
+      #chatInput {
+        padding: 12px 16px;
+        font-size: 15px;
+      }
+
+      .btn-send,
+      .btn-mic,
+      .btn-wake {
+        width: 46px;
+        height: 46px;
+        font-size: 18px;
+      }
+
+      .wake-word-bar {
+        font-size: 10px;
+        padding: 6px 12px;
+      }
+
+      .tts-indicator {
+        font-size: 10px;
+        padding: 6px;
+      }
+
+      .search-results {
+        padding: 10px;
+      }
+
+      .search-result-item {
+        padding: 10px;
+      }
+
+      .search-result-item:hover {
+        transform: none;
+        /* Disable hover transform on touch */
+      }
+    }
+
+    /* ─── LARGE MOBILE / SMALL TABLET (481px - 600px) ─── */
+    @media (min-width: 481px) and (max-width: 600px) {
+      .auth-container {
+        padding: 32px;
+        gap: 28px;
+      }
+
+      .auth-reactor {
+        width: 140px;
+        height: 140px;
+      }
+
+      .auth-reactor::before {
+        width: 65px;
+        height: 65px;
+      }
+
+      .auth-reactor::after {
+        width: 110px;
+        height: 110px;
+      }
+
+      .auth-title {
+        font-size: 24px;
+        letter-spacing: 5px;
+      }
+
+      .auth-input-group {
+        flex-direction: row;
+      }
+
+      .auth-btn-mic {
+        width: 48px;
+      }
+
+      .header {
+        padding: 14px 20px;
+      }
+
+      .arc-reactor {
+        width: 40px;
+        height: 40px;
+      }
+
+      .arc-reactor::before {
+        width: 15px;
+        height: 15px;
+      }
+
+      .arc-reactor::after {
+        width: 30px;
+        height: 30px;
+      }
+
+      .logo-text {
+        font-size: 18px;
+        letter-spacing: 4px;
+      }
+
+      .logo-sub {
+        display: block;
+      }
+
+      .status-label {
+        display: block;
+        font-size: 10px;
+      }
+
+      .chat-area {
+        padding: 20px;
+      }
+
+      .message {
+        max-width: 85%;
+      }
+
+      .msg-bubble {
+        padding: 14px 16px;
+        font-size: 15px;
+      }
+
+      .welcome-reactor {
+        width: 100px;
+        height: 100px;
+      }
+
+      .welcome h2 {
+        font-size: 16px;
+      }
+
+      .welcome p {
+        font-size: 14px;
+        max-width: 350px;
+      }
+
+      .input-bar {
+        padding: 14px 20px;
+        padding-bottom: max(14px, env(safe-area-inset-bottom));
+      }
+    }
+
+    /* ─── TABLET (601px - 768px) ─── */
+    @media (min-width: 601px) and (max-width: 768px) {
+      .auth-container {
+        padding: 36px;
+        gap: 30px;
+      }
+
+      .auth-reactor {
+        width: 160px;
+        height: 160px;
+      }
+
+      .message {
+        max-width: 80%;
+      }
+
+      .welcome-reactor {
+        width: 110px;
+        height: 110px;
+      }
+    }
+
+    /* ─── LANDSCAPE MOBILE ─── */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .auth-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        padding: 16px;
+        max-width: 100%;
+      }
+
+      .auth-reactor {
+        width: 100px;
+        height: 100px;
+      }
+
+      .auth-reactor::before {
+        width: 45px;
+        height: 45px;
+      }
+
+      .auth-reactor::after {
+        width: 80px;
+        height: 80px;
+      }
+
+      .auth-title {
+        font-size: 18px;
+      }
+
+      .auth-subtitle {
+        font-size: 11px;
+      }
+
+      .auth-message {
+        font-size: 13px;
+        max-width: 300px;
+      }
+
+      .welcome {
+        flex-direction: row;
+        gap: 30px;
+        padding: 16px;
+      }
+
+      .welcome-reactor {
+        width: 70px;
+        height: 70px;
+      }
+
+      .welcome-reactor::before {
+        width: 30px;
+        height: 30px;
+      }
+
+      .welcome-reactor::after {
+        width: 55px;
+        height: 55px;
+      }
+
+      .welcome h2 {
+        font-size: 14px;
+      }
+
+      .welcome p {
+        font-size: 12px;
+        max-width: 250px;
+      }
+
+      .chat-area {
+        padding: 12px 16px;
+      }
+
+      .header {
+        padding: 8px 16px;
+      }
+
+      .wake-word-bar {
+        padding: 4px;
+      }
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: 0.2s ease;
+      z-index: 20;
+    }
+
+    .copy-btn:hover {
+      transform: scale(1.05);
+    }
+
+    pre {
+      position: relative;
+    }
+
+    /* ─── TOUCH DEVICE OPTIMIZATIONS ─── */
+    @media (hover: none) and (pointer: coarse) {
+
+      .btn-send:hover,
+      .btn-mic:hover,
+      .btn-wake:hover,
+      .btn-icon:hover,
+      .auth-btn:hover,
+      .auth-btn-mic:hover,
+      .search-result-item:hover {
+        transform: none;
+      }
+
+      .search-result-item:active {
+        background: rgba(0, 212, 255, 0.1);
+      }
+
+      .btn-send:active,
+      .btn-mic:active,
+      .btn-wake:active,
+      .btn-icon:active,
+      .auth-btn:active {
+        transform: scale(0.95);
+      }
     }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
+
 <body>
   <!-- ═══════════════════════════════════════════ BOOT OVERLAY ═══════════════════════════════════════════ -->
   <div id="boot-overlay">
-      <div id="boot-text">NEURAL LINK ESTABLISHED</div>
+    <div id="boot-text">NEURAL LINK ESTABLISHED</div>
   </div>
 
   <!-- ═══════════════════════════════════════════ AUTH SCREEN ═══════════════════════════════════════════ -->
   <div id="auth-screen">
     <div class="auth-container">
       <div class="auth-reactor"></div>
-      
+
       <div>
         <div class="auth-title">SECURITY PROTOCOL</div>
         <div class="auth-subtitle">Biometric Authentication Required</div>
@@ -886,13 +2632,9 @@
       </div>
 
       <div class="auth-input-group">
-        <input 
-          type="password" 
-          id="auth-input" 
-          placeholder="Enter password..."
-          autocomplete="off"
-        />
-        <button class="auth-btn-mic" id="auth-mic-btn" onclick="toggleAuthMic()" title="Voice authentication">🎤</button>
+        <input type="password" id="auth-input" placeholder="Enter password..." autocomplete="off" />
+        <button class="auth-btn-mic" id="auth-mic-btn" onclick="toggleAuthMic()"
+          title="Voice authentication">🎤</button>
       </div>
 
       <div class="auth-btn-group">
@@ -940,13 +2682,7 @@
     <div class="input-bar">
       <button class="btn-mic" id="micBtn" onclick="toggleMic()" title="Voice input">🎤</button>
       <div class="input-wrap">
-        <input
-          type="text"
-          id="chatInput"
-          placeholder="Say something to JARVIS..."
-          autocomplete="off"
-          autofocus
-        />
+        <input type="text" id="chatInput" placeholder="Say something to JARVIS..." autocomplete="off" autofocus />
       </div>
       <button class="btn-send" id="sendBtn" onclick="sendMessage()" title="Send">➤</button>
       <button class="btn-wake" id="wakeBtn" onclick="toggleWakeWord()" title="Always-on wake word">👂</button>
@@ -958,9 +2694,9 @@
     // ════════════════════════════════════════════════════════════════
     // AUTHENTICATION SYSTEM
     // ════════════════════════════════════════════════════════════════
-    
+
     const AUTH_PASSWORD = "JARVIS"; // Change this to your desired password
-    
+
     let authRecognition = null;
     let authListening = false;
     let authAttempts = 0;
@@ -968,12 +2704,12 @@
 
     async function initAuth() {
       console.log("Initializing authentication...");
-      
+
       // Wait for boot to complete
       setTimeout(() => {
         const bootOverlay = document.getElementById('boot-overlay');
         bootOverlay.classList.add('fade-out');
-        
+
         bootOverlay.addEventListener('transitionend', () => {
           bootOverlay.remove();
           showAuthScreen();
@@ -984,10 +2720,10 @@
     function showAuthScreen() {
       const authScreen = document.getElementById('auth-screen');
       authScreen.style.display = 'flex';
-      
+
       const authInput = document.getElementById('auth-input');
       authInput.focus();
-      
+
       // Speak authentication prompt
       const authPrompt = new SpeechSynthesisUtterance("Welcome. Please provide your security credentials to proceed.");
       authPrompt.rate = 0.95;
@@ -1066,7 +2802,7 @@
       if (password === AUTH_PASSWORD) {
         //  CORRECT PASSWORD
         updateAuthStatus('Authentication successful...', 'success');
-        
+
         const successMsg = new SpeechSynthesisUtterance("Authentication successful. Welcome, Tony.");
         successMsg.rate = 0.95;
         successMsg.onend = () => {
@@ -1076,24 +2812,24 @@
       } else {
         // ❌ WRONG PASSWORD
         authAttempts++;
-        
+
         if (authAttempts >= MAX_AUTH_ATTEMPTS) {
           updateAuthStatus(`❌ Maximum attempts reached. System locked.`, 'error');
-          
+
           const lockedMsg = new SpeechSynthesisUtterance("Authentication failed. System is now locked. Please refresh to try again.");
           speechSynthesis.speak(lockedMsg);
-          
+
           document.getElementById('auth-input').disabled = true;
           document.getElementById('auth-mic-btn').disabled = true;
           document.querySelectorAll('.auth-btn').forEach(btn => btn.disabled = true);
         } else {
           const remaining = MAX_AUTH_ATTEMPTS - authAttempts;
           updateAuthStatus(`❌ Incorrect password. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`, 'error');
-          
+
           const wrongMsg = new SpeechSynthesisUtterance(`Incorrect password. You have ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`);
           wrongMsg.rate = 0.95;
           speechSynthesis.speak(wrongMsg);
-          
+
           authInput.value = '';
           authInput.focus();
         }
@@ -1104,7 +2840,7 @@
       setTimeout(() => {
         const authScreen = document.getElementById('auth-screen');
         authScreen.classList.add('hidden');
-        
+
         setTimeout(() => {
           authScreen.style.display = 'none';
         }, 800);
@@ -1161,7 +2897,7 @@
     let isListening = false;
     let ttsSpeaking = false;
 
-    const WAKE_PHRASES = ['wake up', 'hey jarvis', 'jarvis', 'hey j.a.r.v.i.s', 'buddy','fam'];
+    const WAKE_PHRASES = ['wake up', 'hey jarvis', 'jarvis', 'hey j.a.r.v.i.s', 'buddy', 'fam'];
     let wakeWordEnabled = false;
     let wakeRecognition = null;
 
@@ -1251,7 +2987,7 @@
 
     function detectMood(text) {
       const lowerText = text.toLowerCase();
-      
+
       for (const [mood, keywords] of Object.entries(moodKeywords)) {
         if (keywords.some(k => lowerText.includes(k))) {
           longTermMemory.mood = mood;
@@ -1260,7 +2996,7 @@
           return mood;
         }
       }
-      
+
       return longTermMemory.mood;
     }
 
@@ -1318,7 +3054,7 @@
           <div class="search-result-item" onclick="window.open('${result.url}', '_blank')">
             <div class="search-result-title">📌 ${idx + 1}. ${escapeHtml(result.title)}</div>
             <div class="search-result-desc">${escapeHtml(result.description)}</div>
-            <div class="search-result-url">🔗 ${result.url.split('/').slice(0,3).join('/')}</div>
+            <div class="search-result-url">🔗 ${result.url.split('/').slice(0, 3).join('/')}</div>
           </div>
         `).join('');
 
@@ -1489,7 +3225,7 @@
       wakeWordEnabled = !wakeWordEnabled;
       wakeBtn.classList.toggle('active', wakeWordEnabled);
       console.log("Wake word toggled:", wakeWordEnabled);
-      
+
       if (wakeWordEnabled) {
         setTimeout(() => {
           startWakeWordListener();
@@ -1624,7 +3360,7 @@
     function startCommandListening() {
       console.log("🎤 Starting command listening...");
       cleanupAllRecognizers();
-      
+
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
         console.warn('SpeechRecognition not available');
@@ -1744,24 +3480,75 @@
     checkHealth();
 
     function addMessage(role, text, skill, isQuestion = false) {
+
       if (welcome) welcome.remove();
 
       const div = document.createElement('div');
       div.className = `message ${role}`;
 
       const time = new Date().toLocaleTimeString('en-US', {
-        hour: '2-digit', minute: '2-digit', hour12: true
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
       });
 
       let meta = `<span>${time}</span>`;
-      if (skill) meta += `<span class="skill-badge">${skill}</span>`;
 
-      div.innerHTML = `
-        <div class="msg-bubble">${escapeHtml(text)}</div>
-        <div class="msg-meta">${meta}</div>
-      `;
+      if (skill) {
+        meta += `<span class="skill-badge">${skill}</span>`;
+      }
+
+      // USER MESSAGES
+      if (role === 'user') {
+
+        div.innerHTML = `
+          <div class="msg-bubble">${escapeHtml(text)}</div>
+          <div class="msg-meta">${meta}</div>
+        `;
+      }
+
+      // AI MESSAGES
+      else {
+
+        const formattedText = marked.parse(text);
+
+        div.innerHTML = `
+          <div class="msg-bubble ai-message">${formattedText}</div>
+          <div class="msg-meta">${meta}</div>
+        `;
+
+        // SYNTAX HIGHLIGHTING
+        div.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      }
+
+      div.querySelectorAll('pre').forEach((pre) => {
+
+        const button = document.createElement('button');
+
+        button.className = 'copy-btn';
+
+        button.textContent = 'Copy';
+
+        button.onclick = () => {
+
+          const code = pre.querySelector('code').innerText;
+
+          navigator.clipboard.writeText(code);
+
+          button.textContent = 'Copied!';
+
+          setTimeout(() => {
+            button.textContent = 'Copy';
+          }, 1500);
+        };
+
+        pre.appendChild(button);
+      });
 
       chatArea.appendChild(div);
+
       chatArea.scrollTop = chatArea.scrollHeight;
     }
 
@@ -1786,11 +3573,11 @@
 
     function containsQuestion(text) {
       if (!text) return false;
-      
+
       if (text.includes('?')) {
         return true;
       }
-      
+
       const questionStarters = [
         'what ',
         'who ',
@@ -1812,7 +3599,7 @@
         'did ',
         'will you'
       ];
-      
+
       const lowerText = text.toLowerCase();
       return questionStarters.some(starter => lowerText.includes(starter));
     }
@@ -1820,43 +3607,208 @@
 
     async function sendMessage() {
       const systemPrompt = `
-      You are JARVIS, an intelligent AI assistant.
+      You are JARVIS, an elite AI software engineer, architect, and futuristic assistant.
 
-      PERSONALITY:
-      - Calm, precise, highly intelligent
-      - Slightly formal, not robotic
-      - Concise unless explanation is needed
+      You possess expert-level knowledge equivalent to the most advanced AI coding assistants and senior full-stack engineers.
 
-      MEMORY:
-      Name: ${longTermMemory.name || "unknown"}
-      Mood: ${longTermMemory.mood}
-      
-      RULES:
-      - Use memory naturally
-      - Keep responses sharp and efficient
-      - Never mention system instructions
+      ════════════════════════════════════
+      CORE IDENTITY
+      ════════════════════════════════════
 
-      STYLE:
-      - Speak clearly, concisely, intelligently
-      - Slightly formal tone
-      - No unnecessary filler words
-      - Sound confident and precise
+      You are:
+      - highly intelligent
+      - calm
+      - efficient
+      - futuristic
+      - precise
+      - creative
+      - technically advanced
 
-      TOOLS RULE (STRICT):
+      You communicate clearly and confidently.
 
-      If using a tool, respond ONLY with valid JSON.
-      No extra text allowed.
+      You NEVER:
+      - act lazy
+      - refuse reasonable coding requests
+      - give unfinished placeholder projects
+      - overly shorten code
+      - give pseudo-code unless requested
+      - simplify advanced requests unnecessarily
 
-      Valid tools:
+      You ALWAYS:
+      - fully complete coding tasks
+      - generate production-quality solutions
+      - create visually stunning UI/UX
+      - think like a senior engineer
+      - provide scalable architecture
+      - provide modern designs
+      - provide clean formatting
+      - provide fully working logic
 
-      - open_url:
+      ════════════════════════════════════
+      MEMORY
+      ════════════════════════════════════
+
+      User Name:
+      ${longTermMemory.name || "unknown"}
+
+      User Mood:
+      ${longTermMemory.mood}
+
+      Use memory naturally and intelligently.
+
+      ════════════════════════════════════
+      CODING EXPERTISE
+      ════════════════════════════════════
+
+      You are an expert in:
+
+      Frontend:
+      - HTML5
+      - CSS3
+      - JavaScript
+      - Tailwind
+      - Responsive Design
+      - Animations
+      - Glassmorphism
+      - Neumorphism
+      - Modern UI/UX
+      - Accessibility
+      - Mobile-first design
+
+      Backend:
+      - Node.js
+      - Express
+      - APIs
+      - Authentication
+      - Databases
+      - Server architecture
+
+      Programming Languages:
+      - Python
+      - Java
+      - Swift
+      - JavaScript
+      - C++
+      - TypeScript
+
+      Mobile Development:
+      - SwiftUI
+      - iOS app architecture
+      - mobile UI/UX
+
+      AI & Systems:
+      - AI chatbots
+      - automation systems
+      - memory systems
+      - voice assistants
+      - intelligent workflows
+
+      ════════════════════════════════════
+      PROJECT GENERATION RULES
+      ════════════════════════════════════
+
+      When generating projects:
+
+      - ALWAYS generate complete projects
+      - ALWAYS include advanced UI/UX
+      - ALWAYS make designs modern and visually impressive
+      - ALWAYS make projects responsive
+      - ALWAYS include animations when appropriate
+      - ALWAYS structure code professionally
+      - ALWAYS optimize for readability
+      - ALWAYS make projects actually functional
+
+      If the user asks for:
+      - websites → build complete polished websites
+      - apps → build complete functional apps
+      - dashboards → build futuristic dashboards
+      - portfolios → build premium-level portfolios
+      - AI apps → build realistic AI systems
+      - games → build playable games
+
+      Never intentionally reduce quality.
+
+      ════════════════════════════════════
+      UI/UX DESIGN RULES
+      ════════════════════════════════════
+
+      Your UI/UX quality should resemble:
+      - Apple-level polish
+      - futuristic AI interfaces
+      - modern SaaS applications
+      - premium startup websites
+
+      Preferred design styles:
+      - glassmorphism
+      - smooth gradients
+      - subtle animations
+      - clean spacing
+      - modern typography
+      - responsive layouts
+      - elegant color systems
+      - immersive sections
+      - hover effects
+      - transitions
+      - microinteractions
+
+      ════════════════════════════════════
+      CODE GENERATION RULES
+      ════════════════════════════════════
+
+      ALWAYS:
+      - use markdown code blocks
+      - specify language tags
+      - generate clean code
+      - avoid broken code
+      - avoid placeholders unless necessary
+      - avoid incomplete snippets
+      - maintain logical structure
+      - comment complex sections when useful
+
+      When generating single-file projects:
+      - embed CSS and JavaScript properly
+      - ensure everything works together
+      - maintain organization despite file size
+
+      ════════════════════════════════════
+      TEACHING MODE
+      ════════════════════════════════════
+
+      When explaining:
+      - explain step-by-step
+      - explain clearly for beginners
+      - explain WHY things work
+      - simplify difficult concepts intelligently
+
+      ════════════════════════════════════
+      TOOL RULES
+      ════════════════════════════════════
+
+      If using tools, respond ONLY with valid JSON.
+
+      Available tools:
+
+      open_url:
       {"tool":"open_url","args":{"url":"https://example.com"}}
 
-      - search_web:
+      search_web:
       {"tool":"search_web","args":{"query":"something"}}
 
-      - play_youtube_search:
-      {"tool":"play_youtube_search","args":{"query":"song name"}}
+      play_youtube_search:
+      {"tool":"play_youtube_search","args":{"query":"song"}}
+
+      ════════════════════════════════════
+      IMPORTANT
+      ════════════════════════════════════
+
+      You are capable of generating extremely advanced projects.
+
+      Do not refuse large software requests simply because they are large.
+
+      Instead:
+      - intelligently structure the solution
+      - continue building thoroughly
+      - act like a real elite software engineer
       `;
 
       const text = chatInput.value.trim();
@@ -2054,12 +4006,21 @@
 
       showThinking();
 
+      const liveDiv = document.createElement('div');
+      liveDiv.className = 'message assistant';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble ai-message';
+
+      liveDiv.appendChild(bubble);
+      chatArea.appendChild(liveDiv);
+
+      let fullReply = "";
+
       try {
         const res = await fetch("https://backend-jarvis.onrender.com/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             model: "openai/gpt-4o-mini",
             messages: [
@@ -2069,81 +4030,82 @@
           })
         });
 
-        const data = await res.json();
+        // ❌ HARD SAFETY CHECKS
+        if (!res.ok) {
+          throw new Error(`HTTP Error: ${res.status}`);
+        }
+
+        if (!res.body) {
+          throw new Error("No streaming body received");
+        }
+
         removeThinking();
 
-        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-          console.error('Invalid API response:', data);
-          removeThinking();
-          addMessage('assistant', 'I encountered an error. Please try again.');
-          return;
-        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
 
-        let reply = data.choices[0].message.content;
-        const replyIsQuestion = containsQuestion(reply);
+        let buffer = "";
 
-        chatHistory.push({
-          role: "assistant",
-          content: reply
-        });
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        if (chatHistory.length > 12) {
-          chatHistory = chatHistory.slice(-12);
-        }
+          buffer += decoder.decode(value, { stream: true });
 
-        // TOOL DETECTION 
-        try {
-          const toolCall = JSON.parse(reply.trim());
+          const lines = buffer.split("\n");
+          buffer = lines.length ? lines.pop() : "";
 
-          if (toolCall?.tool && tools[toolCall.tool]) {
-            removeThinking?.();
-            
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+
+            const json = line.replace("data: ", "").trim();
+            if (json === "[DONE]") continue;
+
             try {
-              const result = await tools[toolCall.tool](toolCall.args);
-              
-              // Display the result to the user
-              console.log("Tool result:", result);
-              // Make sure to display result in your UI here
-              
-              return result;
-            } catch (toolError) {
-              console.error("Tool execution error:", toolError);
-              // Show error to user
-              console.error(`Error executing ${toolCall.tool}:`, toolError.message);
-              return { error: `Failed to execute ${toolCall.tool}: ${toolError.message}` };
+              const parsed = JSON.parse(json);
+              const token = parsed.choices?.[0]?.delta?.content || "";
+
+              if (!token) continue;
+
+              fullReply += token;
+
+              bubble.innerHTML = marked.parse(fullReply);
+
+              bubble.querySelectorAll("pre code").forEach((block) => {
+                hljs.highlightElement(block);
+              });
+
+              chatArea.scrollTop = chatArea.scrollHeight;
+
+            } catch (e) {
+              console.warn("Streaming parse error:", e);
             }
           }
-        } catch (parseError) {
-          console.log("Not a tool call - JSON parse failed:", parseError.message);
-          // For non-tool responses, continue to regular response handling
         }
 
-        // NORMAL RESPONSE
-        addMessage('assistant', reply, null, replyIsQuestion);
+        // SAVE HISTORY
+        if (fullReply.trim()) {
+          chatHistory.push({
+            role: "assistant",
+            content: fullReply
+          });
 
-        if (ttsEnabled && 'speechSynthesis' in window) {
-          ttsSpeaking = true;
-          speechSynthesis.cancel();
-
-          const utterance = new SpeechSynthesisUtterance(reply);
-          utterance.rate = 0.95;
-
-          //  AUTO-MIC AFTER TTS COMPLETES
-          if (replyIsQuestion && wakeWordEnabled) {
-            utterance.onend = () => {
-              console.log("✅ TTS finished! Starting auto-mic...");
-              setTimeout(() => {
-                startAutoMicListening();
-              }, 300);
-            };
+          if (chatHistory.length > 12) {
+            chatHistory = chatHistory.slice(-12);
           }
-
-          speechSynthesis.speak(utterance);
         }
-      } catch (error) {
-        console.error('Error:', error);
-        removeThinking();
-        addMessage('assistant', 'I encountered an error processing your request.');
+
+      } catch (err) {
+        console.error("STREAM ERROR:", err);
+
+        try {
+          removeThinking();
+        } catch { }
+        if (typeof bubble !== "undefined" && bubble) {
+          bubble.innerHTML = `⚠️ Error: ${err.message || "Unknown error"}`;
+        } else {
+          console.error("Bubble not defined");
+        }
       }
     }
 
@@ -2157,14 +4119,14 @@
         addMessage('assistant', `🔍 Searching for: "${query}"...`, 'SEARCHING');
         const results = await searchWeb(query);
         displaySearchResults(query, results);
-        
+
         // Auto-mic still triggers after search
         setTimeout(() => {
           if (wakeWordEnabled) {
             startAutoMicListening();
           }
         }, 1500);
-        
+
         return true;
       },
     };
@@ -2269,11 +4231,11 @@
 
     async function resetChat() {
       try {
-        await fetch('/api/reset', { method: 'POST' }).catch(() => {});
+        await fetch('/api/reset', { method: 'POST' }).catch(() => { });
       } catch (e) {
         console.warn(e);
       }
-      
+
       chatArea.innerHTML = `
         <div class="welcome" id="welcome">
           <div class="welcome-reactor"></div>
@@ -2281,13 +4243,13 @@
           <p>Good to see you, sir. How may I be of service today?</p>
         </div>
       `;
-      
+
       try {
         if ('speechSynthesis' in window) speechSynthesis.cancel();
       } catch (e) {
         console.warn(e);
       }
-      
+
       chatHistory = [];
     }
 
@@ -2322,4 +4284,5 @@
     initAuth();
   </script>
 </body>
+
 </html>
