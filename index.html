@@ -1557,6 +1557,7 @@
     .thinking-dots {
       display: flex;
       gap: 4px;
+      align-items: center;
     }
 
     .thinking-dots span {
@@ -2598,8 +2599,7 @@
       .thinking-container {
         display: flex;
         align-items: center;
-        gap: 6px;
-        height: 20px;
+        gap: 10px;
       }
 
       .thinking-dot {
@@ -2624,21 +2624,8 @@
         }
       }
 
-      .ai-thinking {
-        display: flex;
-        gap: 5px;
-        align-items: center;
-        margin-bottom: 6px;
-      }
 
-      .ai-thinking .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #00e5ff;
-        animation: bounce 1.2s infinite ease-in-out;
-      }
-
+  
       .ai-thinking .dot:nth-child(2) {
         animation-delay: 0.2s;
       }
@@ -2647,18 +2634,70 @@
         animation-delay: 0.4s;
       }
 
-      @keyframes bounce {
-        0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
-        40% { transform: scale(1); opacity: 1; }
+      
+      .msg-bubble {
+        transition: opacity 0.2s ease;
+      }
+
+      .ai-thinking {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .thinking-dots span {
+        width: 6px;
+        height: 6px;
+        margin-right: 3px;
+        display: inline-block;
+        border-radius: 50%;
+        background: #00e5ff;
+        animation: pulse 1.2s infinite ease-in-out;
+      }
+
+      .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+      .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(0.4); opacity: 0.3; }
+        50% { transform: scale(1); opacity: 1; }
+      }
+
+      .wave {
+        display: flex;
+        gap: 3px;
+      }
+
+      .wave span {
+        width: 3px;
+        height: 12px;
+        background: #00e5ff;
+        animation: wave 1s infinite ease-in-out;
+      }
+
+      .wave span:nth-child(2) { animation-delay: 0.1s; }
+      .wave span:nth-child(3) { animation-delay: 0.2s; }
+
+      @keyframes wave {
+        0%, 100% { transform: scaleY(0.4); opacity: 0.4; }
+        50% { transform: scaleY(1); opacity: 1; }
+      }
+
+      .thinking-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .thinking-text {
-        font-size: 12px;
-        opacity: 0.7;
-        margin-left: 6px;
+        font-size: 13px;
+        opacity: 0.75;
+        color: #00e5ff;
+        white-space: nowrap;
       }
-      .msg-bubble {
-        transition: opacity 0.2s ease;
+
+      .thinking-text {
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
       }
     }
   </style>
@@ -3672,18 +3711,47 @@
     }
 
     function showThinking() {
+
+      const thinkingMessages = [
+        "Analyzing request...",
+        "Thinking...",
+        "Processing data...",
+        "Computing response...",
+        "Gathering context...",
+        "Almost ready...",
+        "Working on it...",
+        "Formulating answer...",
+        "Scanning knowledge base...",
+        "Building response...",
+        "Interpreting input...",
+        "One moment please...",
+        "Synthesizing output...",
+        "Running logic...",
+        "Preparing reply..."
+      ];
+
+      const randomMessage =
+        thinkingMessages[Math.floor(Math.random() * thinkingMessages.length)];
+
       const div = document.createElement('div');
       div.className = 'message assistant';
       div.id = 'thinking';
+
       div.innerHTML = `
         <div class="msg-bubble thinking">
-          <div class="thinking-dots"><span></span><span></span><span></span></div>
-          <span class="thinking-label">Processing</span>
+          <div class="thinking-row">
+            <div class="thinking-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="thinking-status">${randomMessage}</span>
+          </div>
         </div>
       `;
+
       chatArea.appendChild(div);
       chatArea.scrollTop = chatArea.scrollHeight;
     }
+    console.log("thinking element:", document.getElementById("thinking"));
 
     function removeThinking() {
       const el = document.getElementById('thinking');
@@ -3722,6 +3790,52 @@
       const lowerText = text.toLowerCase();
       return questionStarters.some(starter => lowerText.includes(starter));
     }
+
+    // ========================================
+    // FETCH LIVE NEWS
+    // ========================================
+
+    async function fetchNews({
+      query = "",
+      category = ""
+    } = {}) {
+
+      try {
+
+        let url = "https://backend-jarvis.onrender.com/news";
+
+        const params = new URLSearchParams();
+
+        if (query) {
+          params.append("q", query);
+        }
+
+        if (category) {
+          params.append("category", category);
+        }
+
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+
+        const res = await fetch(url);
+
+        const data = await res.json();
+
+        if (!data.success) {
+          throw new Error("News fetch failed");
+        }
+
+        return data.articles;
+
+      } catch (err) {
+
+        console.error("News Error:", err);
+
+        return [];
+      }
+    }
+
 
 
     async function sendMessage() {
@@ -3931,8 +4045,13 @@
       `;
 
       const text = chatInput.value.trim();
-
       const lowerText = text.toLowerCase();
+
+      if (!text) return;
+
+      // 👇 ALWAYS ADD USER MESSAGE FIRST
+      addMessage("user", text);
+      chatInput.value = "";
 
       // ════════════════════════════════════════
       // WEBSITE COMMANDS
@@ -3988,9 +4107,65 @@
             speechSynthesis.speak(utterance);
           }
 
-          chatInput.value = '';
           return;
         }
+      }
+
+      // ========================================
+      // NEWS COMMANDS
+      // ========================================
+
+      if (
+        lowerText.includes("news") ||
+        lowerText.includes("headlines")
+      ) {
+
+        let category = "";
+        let query = "";
+
+        if (lowerText.includes("technology")) category = "technology";
+        else if (lowerText.includes("sports")) category = "sports";
+        else if (lowerText.includes("business")) category = "business";
+        else if (lowerText.includes("health")) category = "health";
+        else if (lowerText.includes("science")) category = "science";
+        else category = "general";
+
+        query = lowerText
+          .replace(/latest/g, "")
+          .replace(/news/g, "")
+          .replace(/headlines/g, "")
+          .replace(/about/g, "")
+          .trim();
+
+        addMessage("assistant", "Fetching the latest news for you...", "LIVE NEWS");
+
+        const articles = await fetchNews({ query, category });
+
+        if (!articles || articles.length === 0) {
+          addMessage("assistant", "I couldn't find any recent news.", "LIVE NEWS");
+          return;
+        }
+
+        let responseText = `📰 Latest News\n\n`;
+
+        articles.forEach((a, i) => {
+          responseText += `${i + 1}. ${a.title}\n${a.description || ""}\n\n`;
+        });
+
+        addMessage("assistant", responseText, "LIVE NEWS");
+
+        // TTS
+        if (ttsEnabled) {
+          speechSynthesis.cancel();
+
+          const speakText = articles.slice(0, 5).map(a => a.title).join(". ");
+
+          speechSynthesis.speak(
+            new SpeechSynthesisUtterance("Here are the latest headlines. " + speakText)
+          );
+        }
+
+        return;
       }
 
       // ════════════════════════════════════════
@@ -4045,7 +4220,7 @@
             speechSynthesis.speak(utterance);
           }
 
-          chatInput.value = '';
+
           return;
         }
       }
@@ -4102,7 +4277,7 @@
             speechSynthesis.speak(utterance);
           }
 
-          chatInput.value = '';
+
           return;
         }
       }
@@ -4120,7 +4295,16 @@
       if (chatHistory.length > 12) {
         chatHistory = chatHistory.slice(-12);
       }
+      
+      let thinkingIndex = 0;
 
+      const thinkingInterval = setInterval(() => {
+        const el = document.getElementById("thinkingStatus");
+        if (el) {
+          el.textContent = thinkingMessages[thinkingIndex];
+          thinkingIndex = (thinkingIndex + 1) % thinkingMessages.length;
+        }
+      }, 900);
 
       isStreaming = true;
       ttsQueue = [];
@@ -4128,7 +4312,6 @@
       lastSpokenBuffer = "";
       lastQueueTime = 0;
 
-      chatInput.value = '';
 
       const liveDiv = document.createElement('div');
       liveDiv.className = 'message assistant';
@@ -4137,12 +4320,12 @@
       bubble.className = 'msg-bubble ai-message';
 
       bubble.innerHTML = `
-        <div class="ai-thinking">
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
+        <div class="thinking-container">
+          <div class="thinking-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="thinking-text" id="thinkingText"></div>
         </div>
-        <div class="thinking-text">Thinking</div>
       `;
 
       liveDiv.appendChild(bubble);
@@ -4219,13 +4402,7 @@
               if (!startedStreaming) {
                 startedStreaming = true;
 
-                // smooth transition instead of blank flash
-                bubble.innerHTML = "";
-                bubble.style.opacity = "0.6";
-
-                setTimeout(() => {
-                  bubble.style.opacity = "1";
-                }, 150);
+                removeThinking(); // clean removal only once
               }
 
               // ===============================
