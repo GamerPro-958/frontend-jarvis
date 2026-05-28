@@ -4123,6 +4123,7 @@
         let category = "";
         let query = "";
 
+        // CATEGORY DETECTION
         if (lowerText.includes("technology")) category = "technology";
         else if (lowerText.includes("sports")) category = "sports";
         else if (lowerText.includes("business")) category = "business";
@@ -4130,38 +4131,61 @@
         else if (lowerText.includes("science")) category = "science";
         else category = "general";
 
+        // QUERY CLEANING
         query = lowerText
           .replace(/latest/g, "")
           .replace(/news/g, "")
           .replace(/headlines/g, "")
+          .replace(/breaking/g, "")
           .replace(/about/g, "")
+          .replace(/of/g, "")
+          .replace(/the/g, "")
           .trim();
 
-        addMessage("assistant", "Fetching the latest news for you...", "LIVE NEWS");
+        addMessage("assistant", "🧠 Fetching intelligence briefing...", "INTELLIGENCE MODE");
 
-        const articles = await fetchNews({ query, category });
+        // 🚀 CALL NEW BACKEND ROUTE
+        const res = await fetch(
+          `https://backend-jarvis.onrender.com/news-intel?q=${encodeURIComponent(query)}&category=${category}`
+        );
 
-        if (!articles || articles.length === 0) {
-          addMessage("assistant", "I couldn't find any recent news.", "LIVE NEWS");
+        const data = await res.json();
+        const articles = data.articles || [];
+
+        if (!articles.length) {
+          addMessage("assistant", "I couldn't generate intelligence briefing for this topic.", "INTELLIGENCE MODE");
           return;
         }
 
-        let responseText = `📰 Latest News\n\n`;
+        // =========================
+        // BUILD INTELLIGENCE OUTPUT
+        // =========================
+        let output = `🧠 JARVIS NEWS INTELLIGENCE BRIEFING\n\n`;
 
         articles.forEach((a, i) => {
-          responseText += `${i + 1}. ${a.title}\n${a.description || ""}\n\n`;
+          output += `📌 ${i + 1}. ${a.title}\n`;
+          output += `🧠 Insight: ${a.insight}\n`;
+          output += `📊 Impact: ${a.impact}\n`;
+          output += `🔗 Source: ${a.url}\n\n`;
         });
 
-        addMessage("assistant", responseText, "LIVE NEWS");
+        addMessage("assistant", output, "INTELLIGENCE MODE");
 
-        // TTS
+        // =========================
+        // 🔊 TTS MODE
+        // =========================
         if (ttsEnabled) {
+
           speechSynthesis.cancel();
 
-          const speakText = articles.slice(0, 5).map(a => a.title).join(". ");
+          const speakText =
+            "Here is your intelligence briefing. " +
+            articles.slice(0, 3)
+              .map(a => a.title + ". " + a.insight)
+              .join(". ");
 
           speechSynthesis.speak(
-            new SpeechSynthesisUtterance("Here are the latest headlines. " + speakText)
+            new SpeechSynthesisUtterance(speakText)
           );
         }
 
