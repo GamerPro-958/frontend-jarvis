@@ -13,11 +13,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
   <style>
-    /* ═══════════════════════════════════════════════════════════════════
-       J.A.R.V.I.S. — IRON MAN HUD INTERFACE
-       Full rewrite. Holographic / retro-futuristic / Stark Industries.
-       ═══════════════════════════════════════════════════════════════════ */
-
     *, *::before, *::after {
       margin: 0;
       padding: 0;
@@ -393,6 +388,7 @@
       font-family: 'Orbitron', sans-serif;
       font-size: clamp(20px, 4vw, 30px);
       font-weight: 900;
+      letter-spacing: 0.45em;
       color: var(--hud-cyan-bright);
       text-shadow:
         0 0 18px var(--hud-glow),
@@ -405,11 +401,11 @@
     .auth-subtitle {
       font-family: 'Share Tech Mono', monospace;
       font-size: clamp(11px, 1.6vw, 13px);
-    
+      letter-spacing: 0.3em;
       color: var(--text-muted);
       text-transform: uppercase;
       text-align: center;
-      margin-top: 14px;
+      margin-top: -14px;
       position: relative;
     }
     .auth-subtitle::before,
@@ -1657,13 +1653,13 @@
     /* Stack containers — hold one or more panels in a column */
     .hud-stack {
       position: fixed;
-      top: 88px;
+      top: 132px; /* clear of header + wake-word bar */
       display: none; /* hidden until >=1024px */
       flex-direction: column;
       gap: 14px;
       z-index: 4;
       pointer-events: none; /* children re-enable */
-      max-height: calc(100vh - 180px); /* leave room for input bar */
+      max-height: calc(100vh - 230px); /* leave room for input bar */
       overflow: hidden; /* if a single panel is taller than viewport, just clip */
     }
     .hud-stack-left  { left: 30px;  align-items: flex-start; }
@@ -2045,6 +2041,827 @@
       z-index: 400;
     }
 
+    /* ════════════════════════════════════════════════════════════════════════
+       ARMOR SCHEMATIC PANEL (Mk.VII hologram)
+       ════════════════════════════════════════════════════════════════════════ */
+
+    .hud-suit-stage {
+      position: relative;
+      margin: 12px 14px 10px;
+      height: 286px;
+      background:
+        radial-gradient(ellipse at center,
+          rgba(102, 225, 255, 0.08) 0%,
+          rgba(102, 225, 255, 0.02) 45%,
+          transparent 75%),
+        #010810;
+      border: 1px solid var(--hud-border-soft);
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(102, 225, 255, 0.06);
+    }
+    /* Hex / dot pattern background inside the stage */
+    .hud-suit-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at center,
+          rgba(102, 225, 255, 0.10) 0.5px,
+          transparent 1px);
+      background-size: 8px 8px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    /* Subtle scanline interference overlay */
+    .hud-suit-stage::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 2px,
+        rgba(102, 225, 255, 0.03) 2px,
+        rgba(102, 225, 255, 0.03) 3px
+      );
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    /* Floating suit figure container — bobs gently */
+    .hud-suit-fig {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 160px;
+      height: 256px;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      animation: suitFloat 4.6s ease-in-out infinite, suitFlicker 8s steps(1) infinite;
+      filter:
+        drop-shadow(0 0 6px rgba(102, 225, 255, 0.55))
+        drop-shadow(0 0 16px rgba(102, 225, 255, 0.30));
+    }
+    .hud-suit-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    @keyframes suitFloat {
+      0%, 100% { transform: translate(-50%, -52%); }
+      50%      { transform: translate(-50%, -48%); }
+    }
+    /* Occasional holographic flicker — very brief opacity dips */
+    @keyframes suitFlicker {
+      0%, 18%, 20%, 60%, 62%, 100% { opacity: 1; }
+      19% { opacity: 0.72; }
+      61% { opacity: 0.85; }
+    }
+
+    /* Eye visor slits — pulse-glow */
+    .suit-eyes {
+      filter: drop-shadow(0 0 3px #b5f1ff) drop-shadow(0 0 6px #66e1ff);
+      animation: eyesGlow 2.4s ease-in-out infinite;
+    }
+    @keyframes eyesGlow {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.55; }
+    }
+
+    /* Arc reactor white-hot core — pulsing brightness */
+    .suit-reactor-core {
+      filter:
+        drop-shadow(0 0 4px #ffffff)
+        drop-shadow(0 0 9px #b5f1ff)
+        drop-shadow(0 0 18px #66e1ff);
+      animation: reactorCorePulse 2s ease-in-out infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    @keyframes reactorCorePulse {
+      0%, 100% { transform: scale(0.85); opacity: 0.92; }
+      50%      { transform: scale(1.12); opacity: 1; }
+    }
+    /* Triangular core suggestion — slow rotation */
+    .suit-reactor-tri {
+      transform-origin: 100px 130px;
+      animation: reactorTriSpin 14s linear infinite;
+    }
+    @keyframes reactorTriSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* Palm repulsors — pulse */
+    .suit-repulsor {
+      filter: drop-shadow(0 0 3px #b5f1ff) drop-shadow(0 0 6px #66e1ff);
+      animation: repulsorPulse 2.6s ease-in-out infinite;
+    }
+    .suit-repulsor-r { animation-delay: -1.3s; }
+    @keyframes repulsorPulse {
+      0%, 100% { opacity: 0.55; }
+      50%      { opacity: 1; }
+    }
+
+    /* ── ORBITAL RINGS (3D rotated) ── */
+    .hud-suit-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      border: 1px solid rgba(102, 225, 255, 0.45);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      box-shadow:
+        0 0 18px rgba(102, 225, 255, 0.20),
+        inset 0 0 12px rgba(102, 225, 255, 0.10);
+    }
+    .hud-suit-ring-1 {
+      width: 180px; height: 180px;
+      transform: translate(-50%, -50%) rotateX(72deg);
+      animation: ringSpin1 12s linear infinite;
+      border-style: dashed;
+      border-color: rgba(102, 225, 255, 0.55);
+    }
+    .hud-suit-ring-2 {
+      width: 220px; height: 220px;
+      transform: translate(-50%, -50%) rotateX(78deg) rotateZ(45deg);
+      animation: ringSpin2 18s linear infinite reverse;
+      opacity: 0.7;
+    }
+    .hud-suit-ring-3 {
+      width: 250px; height: 250px;
+      transform: translate(-50%, -50%) rotateX(82deg) rotateZ(-30deg);
+      animation: ringSpin3 26s linear infinite;
+      opacity: 0.45;
+      border-style: dotted;
+    }
+    @keyframes ringSpin1 {
+      from { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(0deg); }
+      to   { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); }
+    }
+    @keyframes ringSpin2 {
+      from { transform: translate(-50%, -50%) rotateX(78deg) rotateZ(0deg); }
+      to   { transform: translate(-50%, -50%) rotateX(78deg) rotateZ(360deg); }
+    }
+    @keyframes ringSpin3 {
+      from { transform: translate(-50%, -50%) rotateX(82deg) rotateZ(0deg); }
+      to   { transform: translate(-50%, -50%) rotateX(82deg) rotateZ(360deg); }
+    }
+
+    /* ── VERTICAL SCAN BEAM (sweeps top→bottom over suit) ── */
+    .hud-suit-scan {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(180deg,
+        transparent 0%,
+        var(--hud-cyan) 50%,
+        transparent 100%);
+      box-shadow:
+        0 0 12px var(--hud-cyan),
+        0 0 24px var(--hud-glow);
+      filter: blur(0.5px);
+      pointer-events: none;
+      z-index: 5;
+      animation: suitScan 4.2s cubic-bezier(0.55, 0, 0.55, 1) infinite;
+    }
+    @keyframes suitScan {
+      0%   { transform: translateY(0);     opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 1; }
+      100% { transform: translateY(282px); opacity: 0; }
+    }
+
+    /* ── Corner data tags ── */
+    .hud-suit-tag {
+      position: absolute;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      color: var(--hud-cyan);
+      text-shadow: 0 0 4px var(--hud-glow-soft);
+      background: rgba(2, 8, 16, 0.65);
+      padding: 2px 5px;
+      border: 1px solid var(--hud-border-soft);
+      text-transform: uppercase;
+      z-index: 6;
+      pointer-events: none;
+    }
+    .hud-suit-tag-tl { top: 8px;    left: 8px;  }
+    .hud-suit-tag-tr { top: 8px;    right: 8px; }
+    .hud-suit-tag-bl { bottom: 8px; left: 8px;  }
+    .hud-suit-tag-br { bottom: 8px; right: 8px; }
+    /* Connecting lines from tags toward the figure for "annotation" feel */
+    .hud-suit-tag-tl::after,
+    .hud-suit-tag-tr::after,
+    .hud-suit-tag-bl::after,
+    .hud-suit-tag-br::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 1px;
+      background: var(--hud-cyan);
+      opacity: 0.6;
+      box-shadow: 0 0 4px var(--hud-glow);
+    }
+    .hud-suit-tag-tl::after { right: -16px;  top: 50%; }
+    .hud-suit-tag-tr::after { left:  -16px;  top: 50%; }
+    .hud-suit-tag-bl::after { right: -16px;  top: 50%; }
+    .hud-suit-tag-br::after { left:  -16px;  top: 50%; }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       CLICKABLE PANEL AFFORDANCE
+       ════════════════════════════════════════════════════════════════════════ */
+    .hud-panel[data-modal] {
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .hud-panel[data-modal]:hover {
+      border-color: var(--hud-cyan);
+      box-shadow:
+        0 0 42px var(--hud-glow-soft),
+        0 0 90px rgba(102, 225, 255, 0.15),
+        inset 0 0 36px var(--hud-glow-faint);
+    }
+    /* Expand affordance icon, top-right of header */
+    .hud-expand-icon {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 10px;
+      color: var(--hud-cyan-dim);
+      transition: color 0.2s, transform 0.2s;
+    }
+    .hud-panel[data-modal]:hover .hud-expand-icon {
+      color: var(--hud-cyan-bright);
+      transform: rotate(45deg) scale(1.1);
+      text-shadow: 0 0 6px var(--hud-glow);
+    }
+
+    /* Make panel header re-position pill+icon */
+    .hud-head { gap: 8px; }
+
+    /* The iframe inside Spotify panel should NOT trigger modal — let clicks land on iframe */
+    .hud-spotify-frame { position: relative; }
+    .hud-spotify-iframe { pointer-events: auto; }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       MODAL — Expanded panel detail view
+       ════════════════════════════════════════════════════════════════════════ */
+    .hud-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background:
+        radial-gradient(ellipse at center, rgba(2, 8, 16, 0.78) 0%, rgba(0, 4, 10, 0.94) 70%);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    .hud-modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    /* Subtle radial scan inside the backdrop */
+    .hud-modal-overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(0deg,
+          transparent 0px, transparent 3px,
+          rgba(102, 225, 255, 0.025) 3px, rgba(102, 225, 255, 0.025) 4px);
+      pointer-events: none;
+    }
+
+    .hud-modal {
+      position: relative;
+      width: min(880px, 100%);
+      max-height: calc(100vh - 60px);
+      background:
+        linear-gradient(180deg, rgba(10, 23, 41, 0.96) 0%, rgba(4, 10, 20, 0.94) 100%);
+      border: 1px solid var(--hud-cyan);
+      box-shadow:
+        0 0 50px var(--hud-glow-soft),
+        0 0 120px rgba(102, 225, 255, 0.20),
+        inset 0 0 60px var(--hud-glow-faint);
+      clip-path: polygon(
+        0 22px, 22px 0,
+        calc(100% - 22px) 0, 100% 22px,
+        100% calc(100% - 22px), calc(100% - 22px) 100%,
+        22px 100%, 0 calc(100% - 22px)
+      );
+      transform: scale(0.85) translateY(20px);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.35s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .hud-modal-overlay.open .hud-modal {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    /* Modal header bar */
+    .hud-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 28px 16px;
+      border-bottom: 1px solid var(--hud-border);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .hud-modal-head::after {
+      content: '';
+      position: absolute;
+      left: 28px; right: 28px;
+      bottom: -1px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--hud-cyan-bright) 50%, transparent);
+      filter: drop-shadow(0 0 4px var(--hud-glow));
+    }
+    .hud-modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.32em;
+      color: var(--hud-cyan-bright);
+      text-shadow: 0 0 10px var(--hud-glow);
+      margin: 0;
+    }
+    .hud-modal-subtitle {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .hud-modal-close {
+      width: 36px; height: 36px;
+      background: var(--hud-surface);
+      border: 1px solid var(--hud-border);
+      color: var(--hud-cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+      clip-path: polygon(
+        8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px
+      );
+    }
+    .hud-modal-close:hover {
+      border-color: var(--hud-red);
+      color: var(--hud-red);
+      box-shadow: 0 0 14px var(--hud-red-glow);
+    }
+    .hud-modal-close:active { transform: scale(0.92); }
+
+    /* Modal body */
+    .hud-modal-body {
+      padding: 22px 28px 26px;
+      overflow-y: auto;
+      flex: 1;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+    }
+    .hud-modal-body::-webkit-scrollbar { width: 4px; }
+    .hud-modal-body::-webkit-scrollbar-thumb { background: var(--hud-border); }
+
+    /* Modal layout — 2-column when there's a featured visual */
+    .hud-modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 720px) {
+      .hud-modal-grid { grid-template-columns: 1fr; }
+    }
+    .hud-modal-section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: var(--hud-cyan-bright);
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--hud-border-soft);
+      text-shadow: 0 0 6px var(--hud-glow-soft);
+    }
+
+    /* Data list in modal */
+    .hud-modal-data {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin: 0;
+    }
+    .hud-modal-data .hud-readout {
+      padding: 7px 0;
+      font-size: 12px;
+    }
+    .hud-modal-data .hud-readout dt { font-size: 11px; }
+    .hud-modal-data .hud-readout dd { font-size: 12px; max-width: 65%; }
+
+    /* GEO modal map slot — bigger frame */
+    .hud-modal-map-slot {
+      position: relative;
+      height: 320px;
+      background: #02060d;
+      border: 1px solid var(--hud-border);
+      overflow: hidden;
+    }
+    .hud-modal-map-slot .hud-map { position: absolute; inset: 0; }
+
+    /* SYS modal — big clock + bigger bars */
+    .hud-modal-clock {
+      text-align: center;
+      padding: 18px 0 16px;
+      border-bottom: 1px dashed var(--hud-border-soft);
+      margin-bottom: 16px;
+    }
+    .hud-modal-clock-time {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 44px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--hud-cyan-bright);
+      text-shadow: 0 0 14px var(--hud-glow), 0 0 28px var(--hud-glow-soft);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .hud-modal-clock-date {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.32em;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+    .hud-modal-bars { display: flex; flex-direction: column; gap: 14px; }
+    .hud-modal-bars .hud-bar-head { font-size: 11px; }
+    .hud-modal-bars .hud-bar-track { height: 11px; }
+
+    /* Suit modal — large schematic */
+    .hud-modal-suit-stage {
+      position: relative;
+      height: 460px;
+      background:
+        radial-gradient(ellipse at center,
+          rgba(102, 225, 255, 0.10) 0%,
+          rgba(102, 225, 255, 0.02) 45%,
+          transparent 75%),
+        #010810;
+      border: 1px solid var(--hud-border);
+      overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(102, 225, 255, 0.08);
+    }
+    .hud-modal-suit-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at center, rgba(102, 225, 255, 0.12) 0.5px, transparent 1px);
+      background-size: 10px 10px;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .hud-modal-suit-stage::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent 0px, transparent 2px,
+        rgba(102, 225, 255, 0.04) 2px, rgba(102, 225, 255, 0.04) 3px);
+      pointer-events: none;
+      z-index: 4;
+    }
+    .hud-modal-suit-stage .hud-suit-fig {
+      width: 240px;
+      height: 380px;
+    }
+    .hud-modal-suit-stage .hud-suit-ring-1 { width: 280px; height: 280px; }
+    .hud-modal-suit-stage .hud-suit-ring-2 { width: 340px; height: 340px; }
+    .hud-modal-suit-stage .hud-suit-ring-3 { width: 390px; height: 390px; }
+    .hud-modal-suit-stage .hud-suit-scan {
+      animation: suitScanBig 4.2s cubic-bezier(0.55, 0, 0.55, 1) infinite;
+    }
+    @keyframes suitScanBig {
+      0%   { transform: translateY(0);     opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 1; }
+      100% { transform: translateY(456px); opacity: 0; }
+    }
+
+    /* Spotify modal — bigger embed */
+    .hud-modal-spotify-frame {
+      position: relative;
+      background: #181818;
+      border: 1px solid var(--hud-border);
+      min-height: 352px;
+      overflow: hidden;
+    }
+    .hud-modal-spotify-frame iframe {
+      display: block;
+      width: 100%;
+      height: 352px;
+      border: 0;
+    }
+
+    /* On small screens, hide modal for tablets if needed — keep functional */
+    @media (max-width: 640px) {
+      .hud-modal { width: 100%; }
+      .hud-modal-head { padding: 14px 18px 12px; }
+      .hud-modal-body { padding: 16px 18px 20px; }
+      .hud-modal-clock-time { font-size: 32px; }
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       CLICK RIPPLE — fires from click point on any data-modal panel
+       ════════════════════════════════════════════════════════════════════════ */
+    .hud-panel { overflow: hidden; }
+    .hud-click-ripple {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, var(--hud-cyan-bright) 35%, transparent 70%);
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(1);
+      box-shadow:
+        0 0 18px var(--hud-cyan-bright),
+        0 0 38px var(--hud-glow);
+      animation: rippleExpand 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      z-index: 30;
+    }
+    @keyframes rippleExpand {
+      0%   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(60);  opacity: 0; }
+    }
+
+    /* Panel press feedback (slight inward bounce) */
+    .hud-panel-pressed {
+      animation: panelPress 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    @keyframes panelPress {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(0.97); filter: brightness(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       MODAL ENTRANCE — dramatic zoom + sweep + stagger
+       ════════════════════════════════════════════════════════════════════════ */
+
+    /* Override the basic modal transform with a zoom-from-origin variant */
+    .hud-modal {
+      transform: translate(var(--origin-dx, 0px), var(--origin-dy, 0px)) scale(0.2);
+      opacity: 0;
+      transition:
+        transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.4s ease-out;
+    }
+    .hud-modal-overlay.open .hud-modal {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+
+    /* Scanline sweep across modal on open */
+    .hud-modal::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: -4px;
+      height: 4px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--hud-cyan-bright) 30%,
+        #ffffff 50%,
+        var(--hud-cyan-bright) 70%,
+        transparent 100%);
+      filter: blur(1.5px);
+      box-shadow:
+        0 0 18px var(--hud-cyan),
+        0 0 36px var(--hud-glow);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+    }
+    .hud-modal-overlay.open .hud-modal::before {
+      animation: modalScanSweep 1.2s cubic-bezier(0.55, 0, 0.55, 1) 0.25s forwards;
+    }
+    @keyframes modalScanSweep {
+      0%   { top: -4px;          opacity: 0; }
+      8%   { opacity: 1; }
+      88%  { opacity: 1; }
+      100% { top: calc(100% - 4px); opacity: 0; }
+    }
+
+    /* Animated brush under modal header title */
+    .hud-modal-head::after {
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+    }
+    .hud-modal-overlay.open .hud-modal-head::after {
+      transform: scaleX(1);
+    }
+
+    /* Stagger-in for modal body children */
+    .hud-stagger-item {
+      animation: staggerFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes staggerFadeIn {
+      0%   { opacity: 0; transform: translateY(10px); filter: blur(3px); }
+      100% { opacity: 1; transform: translateY(0);    filter: blur(0); }
+    }
+
+    /* Section titles get a sliding underline brush */
+    .hud-modal-section-title {
+      position: relative;
+      overflow: hidden;
+    }
+    .hud-modal-section-title::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: 0;
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--hud-cyan-bright) 40%,
+        #ffffff 50%,
+        var(--hud-cyan-bright) 60%,
+        transparent 100%);
+      transform: translateX(-100%);
+    }
+    .hud-stagger-item.hud-modal-section-title::after {
+      animation: titleBrush 1s cubic-bezier(0.5, 0, 0.5, 1) 0.4s forwards;
+    }
+    @keyframes titleBrush {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Modal data readouts: flash highlight on appearance */
+    .hud-modal-data .hud-readout.hud-stagger-item {
+      animation: staggerFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both,
+                 readoutFlash 0.8s ease-out both;
+    }
+    @keyframes readoutFlash {
+      0%   { background: rgba(102, 225, 255, 0.18); }
+      100% { background: transparent; }
+    }
+
+    /* Bars: fill-sweep on modal open */
+    .hud-modal-bars .hud-bar.hud-stagger-item .hud-bar-fill::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.6) 50%,
+        transparent 100%);
+      transform: translateX(-100%);
+      animation: barShimmer 1.4s cubic-bezier(0.5, 0, 0.5, 1) 0.5s;
+    }
+    @keyframes barShimmer {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       SUIT-SPECIFIC ANIMATIONS — energy waves, boot-up scan, hover
+       ════════════════════════════════════════════════════════════════════════ */
+
+    /* Energy pulse waves emanating from arc reactor (only in modal — bigger stage) */
+    .hud-modal-suit-stage::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      border: 1.5px solid var(--hud-cyan-bright);
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px var(--hud-glow);
+      animation: reactorWave 2.8s ease-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    @keyframes reactorWave {
+      0%   { width: 4px;   height: 4px;   opacity: 1; border-width: 1.5px; }
+      100% { width: 320px; height: 320px; opacity: 0; border-width: 0.3px; }
+    }
+
+    /* Boot-up scan: starts from bottom of suit, sweeps up on modal open */
+    .hud-suit-bootup {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 6px;
+      background: linear-gradient(0deg,
+        transparent 0%,
+        var(--hud-cyan-bright) 50%,
+        #ffffff 60%,
+        transparent 100%);
+      box-shadow:
+        0 0 22px var(--hud-cyan),
+        0 0 44px var(--hud-glow);
+      filter: blur(1.5px);
+      pointer-events: none;
+      z-index: 10;
+      animation: bootScanUp 1.6s cubic-bezier(0.55, 0, 0.5, 1) 0.4s forwards;
+      opacity: 0;
+    }
+    @keyframes bootScanUp {
+      0%   { transform: translateY(0);     opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translateY(-460px); opacity: 0; }
+    }
+
+    /* Reactor center pulse — extra dramatic */
+    .suit-reactor-core {
+      filter:
+        drop-shadow(0 0 4px #ffffff)
+        drop-shadow(0 0 9px #b5f1ff)
+        drop-shadow(0 0 18px #66e1ff);
+    }
+
+    /* Hover on suit panel makes orbital rings spin faster */
+    .hud-suit:hover .hud-suit-ring-1 { animation-duration: 5s; }
+    .hud-suit:hover .hud-suit-ring-2 { animation-duration: 7s; }
+    .hud-suit:hover .hud-suit-ring-3 { animation-duration: 9s; }
+
+    /* Hover on suit panel makes the figure rotate slightly + brighten */
+    .hud-suit:hover .hud-suit-fig {
+      filter:
+        drop-shadow(0 0 10px rgba(102, 225, 255, 0.85))
+        drop-shadow(0 0 24px rgba(102, 225, 255, 0.45));
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       SUBTLE TRANSITIONS THROUGHOUT
+       ════════════════════════════════════════════════════════════════════════ */
+
+    /* Header underline — periodic brush */
+    .hud-head::after {
+      animation: headBrush 6s ease-in-out infinite;
+    }
+    @keyframes headBrush {
+      0%, 90%, 100% { opacity: 0.6; transform: scaleX(1); }
+      45%           { opacity: 1;   transform: scaleX(1.05); }
+    }
+
+    /* Status pill subtle ambient pulse */
+    .hud-pill-ok {
+      animation: pillAmbient 3.5s ease-in-out infinite;
+    }
+    @keyframes pillAmbient {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(93, 255, 172, 0); }
+      50%      { box-shadow: 0 0 0 4px rgba(93, 255, 172, 0.06); }
+    }
+
+    /* Hover: expand icon spins + glows extra */
+    .hud-panel[data-modal]:hover .hud-expand-icon {
+      animation: expandSpin 0.6s ease-out forwards;
+    }
+    @keyframes expandSpin {
+      0%   { transform: rotate(0deg)   scale(1); }
+      100% { transform: rotate(90deg)  scale(1.25); }
+    }
+
+    /* Panel hover: small upward lift */
+    .hud-panel[data-modal] {
+      transition:
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.3s ease,
+        box-shadow 0.4s ease,
+        filter 0.4s ease,
+        opacity 0.45s ease;
+    }
+    .hud-panel[data-modal]:hover {
+      transform: translateY(-3px) scale(1.015);
+    }
+    /* Override chat-active hover restore */
+    body.chat-active .hud-panel[data-modal]:hover {
+      transform: translateY(-2px) scale(1.0);
+    }
+
     /* ════════════════ CHAT-ACTIVE TRANSITION ════════════════ */
 
     /* In chat mode, the panels recede slightly to give the chat the spotlight,
@@ -2229,13 +3046,29 @@
   <!-- ═══════════════════════════════ HUD SWEEP OVERLAY ════════════════════════════════ -->
   <div class="hud-sweep" id="hudSweep" aria-hidden="true"></div>
 
+  <!-- ═══════════════════════════════ HUD MODAL (expanded panel view) ═══════════════════ -->
+  <div class="hud-modal-overlay" id="hudModalOverlay" aria-hidden="true" role="dialog">
+    <div class="hud-modal" id="hudModal">
+      <header class="hud-modal-head">
+        <div>
+          <h2 class="hud-modal-title" id="hudModalTitle">◈ EXPANDED VIEW</h2>
+          <div class="hud-modal-subtitle" id="hudModalSubtitle">SYSTEM·DETAIL</div>
+        </div>
+        <button class="hud-modal-close" id="hudModalClose" aria-label="Close">✕</button>
+      </header>
+      <div class="hud-modal-body" id="hudModalBody">
+        <!-- Populated by JS based on which panel was clicked -->
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════════════════════ DASHBOARD: LEFT STACK ════════════════════════════ -->
   <div class="hud-stack hud-stack-left" id="hudStackLeft">
 
     <!-- ── GEO LOCATOR ── -->
-    <aside class="hud-panel hud-geo" id="geoPanel" aria-label="Geo locator">
+    <aside class="hud-panel hud-geo" id="geoPanel" data-modal="geo" aria-label="Geo locator">
       <header class="hud-head">
-        <h3 class="hud-head-title">◈ GEO·LOCATOR</h3>
+        <h3 class="hud-head-title">◈ GEO·LOCATOR <span class="hud-expand-icon">⤢</span></h3>
         <span class="hud-pill" id="geoStatus">SCANNING</span>
       </header>
 
@@ -2260,9 +3093,9 @@
     </aside>
 
     <!-- ── AUDIO STREAM (Spotify) ── -->
-    <aside class="hud-panel hud-spotify" id="spotifyPanel" aria-label="Audio stream">
+    <aside class="hud-panel hud-spotify" id="spotifyPanel" data-modal="spotify" aria-label="Audio stream">
       <header class="hud-head">
-        <h3 class="hud-head-title">◈ AUDIO·STREAM</h3>
+        <h3 class="hud-head-title">◈ AUDIO·STREAM <span class="hud-expand-icon">⤢</span></h3>
         <span class="hud-pill hud-pill-music" id="musicStatus">▶ LIVE</span>
       </header>
 
@@ -2292,9 +3125,9 @@
   <div class="hud-stack hud-stack-right" id="hudStackRight">
 
     <!-- ── SYS METRICS ── -->
-    <aside class="hud-panel hud-sys" id="sysPanel" aria-label="System metrics">
+    <aside class="hud-panel hud-sys" id="sysPanel" data-modal="sys" aria-label="System metrics">
       <header class="hud-head">
-        <h3 class="hud-head-title">◈ SYS·METRICS</h3>
+        <h3 class="hud-head-title">◈ SYS·METRICS <span class="hud-expand-icon">⤢</span></h3>
         <span class="hud-pill hud-pill-ok" id="sysStatus">NOMINAL</span>
       </header>
 
@@ -2322,6 +3155,329 @@
         <span class="hud-uptime-lbl">▸ UPTIME</span>
         <span class="hud-uptime-val" id="uptimeVal">00:00:00</span>
       </div>
+    </aside>
+
+    <!-- ── ARMOR HOLOGRAM (Mk.VII) ── -->
+    <aside class="hud-panel hud-suit" id="suitPanel" data-modal="suit" aria-label="Armor schematic">
+      <header class="hud-head">
+        <h3 class="hud-head-title">◈ MK·VII SCHEMATIC <span class="hud-expand-icon">⤢</span></h3>
+        <span class="hud-pill hud-pill-ok">ONLINE</span>
+      </header>
+
+      <div class="hud-suit-stage">
+        <!-- Corner tags -->
+        <span class="hud-suit-tag hud-suit-tag-tl">HELM·INT</span>
+        <span class="hud-suit-tag hud-suit-tag-tr">ARC·CORE</span>
+        <span class="hud-suit-tag hud-suit-tag-bl">REPULSOR</span>
+        <span class="hud-suit-tag hud-suit-tag-br">BOOST·SYS</span>
+
+        <!-- Orbital rings (3D rotated) -->
+        <div class="hud-suit-ring hud-suit-ring-1" aria-hidden="true"></div>
+        <div class="hud-suit-ring hud-suit-ring-2" aria-hidden="true"></div>
+        <div class="hud-suit-ring hud-suit-ring-3" aria-hidden="true"></div>
+
+        <!-- Floating suit hologram — iconic Mk VII design -->
+        <div class="hud-suit-fig" aria-hidden="true">
+          <svg class="hud-suit-svg" viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Cyan armor (main plate) -->
+              <linearGradient id="armorGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="rgba(170,240,255,0.55)"/>
+                <stop offset="50%"  stop-color="rgba(90,205,235,0.32)"/>
+                <stop offset="100%" stop-color="rgba(0,100,140,0.20)"/>
+              </linearGradient>
+              <!-- Darker armor (recessed areas) -->
+              <linearGradient id="armorGradDark" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="rgba(0,170,210,0.50)"/>
+                <stop offset="100%" stop-color="rgba(0,60,85,0.28)"/>
+              </linearGradient>
+              <!-- Highlight (top edge of plates) -->
+              <linearGradient id="armorHi" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="rgba(200,245,255,0.85)"/>
+                <stop offset="100%" stop-color="rgba(102,225,255,0)"/>
+              </linearGradient>
+              <!-- GOLD ACCENT (Iron Man's gold plates — done in warm amber for hologram) -->
+              <linearGradient id="goldAccent" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="rgba(255,220,130,0.65)"/>
+                <stop offset="55%"  stop-color="rgba(255,170,60,0.50)"/>
+                <stop offset="100%" stop-color="rgba(180,90,20,0.35)"/>
+              </linearGradient>
+              <!-- Triangular arc reactor core gradient -->
+              <radialGradient id="reactorCoreGrad" cx="0.5" cy="0.5" r="0.55">
+                <stop offset="0%"   stop-color="#ffffff"/>
+                <stop offset="22%"  stop-color="#e8fbff"/>
+                <stop offset="48%"  stop-color="#9ee9ff"/>
+                <stop offset="78%"  stop-color="#3bb5d6"/>
+                <stop offset="100%" stop-color="#01304a"/>
+              </radialGradient>
+              <radialGradient id="repulsorGrad" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%"   stop-color="#ffffff"/>
+                <stop offset="35%"  stop-color="#fff2c4"/>
+                <stop offset="70%"  stop-color="#ffb84d"/>
+                <stop offset="100%" stop-color="rgba(255,184,77,0)"/>
+              </radialGradient>
+              <radialGradient id="eyeGlow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%"   stop-color="#ffffff"/>
+                <stop offset="50%"  stop-color="#cdf4ff"/>
+                <stop offset="100%" stop-color="rgba(102,225,255,0)"/>
+              </radialGradient>
+            </defs>
+
+            <!-- ════════════════════ HELMET (iconic Mk VII silhouette) ════════════════════ -->
+            <g class="suit-helmet">
+              <!-- Back of helmet (subtle, darker) -->
+              <path d="M 72 12 Q 100 6 128 12 L 134 30 Q 135 50 130 70 L 70 70 Q 65 50 66 30 Z"
+                    fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.8" opacity="0.6"/>
+
+              <!-- GOLD faceplate — the signature element -->
+              <path d="M 70 26 L 130 26 L 134 50 Q 130 70 122 82 Q 116 92 100 96 Q 84 92 78 82 Q 70 70 66 50 Z"
+                    fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1.4"/>
+              <!-- Faceplate top highlight -->
+              <path d="M 72 28 L 128 28 L 130 38 Q 128 32 100 32 Q 72 32 70 38 Z"
+                    fill="url(#armorHi)" opacity="0.4"/>
+              <!-- Gold cheek bone accents -->
+              <path d="M 70 50 L 84 46 L 86 64 L 72 66 Z" fill="rgba(255,170,60,0.55)" stroke="#ffce5e" stroke-width="0.7"/>
+              <path d="M 130 50 L 116 46 L 114 64 L 128 66 Z" fill="rgba(255,170,60,0.55)" stroke="#ffce5e" stroke-width="0.7"/>
+
+              <!-- Cyan brow strip -->
+              <path d="M 70 28 L 86 26 L 100 24 L 114 26 L 130 28 L 128 38 L 100 34 L 72 38 Z"
+                    fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="0.8"/>
+
+              <!-- Forehead seam (vertical) -->
+              <line x1="100" y1="10" x2="100" y2="24" stroke="#66e1ff" stroke-width="0.7"/>
+              <line x1="100" y1="34" x2="100" y2="42" stroke="#ffce5e" stroke-width="0.6"/>
+
+              <!-- ICONIC EYE SLITS — angled inward, glowing cyan -->
+              <path class="suit-eyes" d="M 74 46 L 95 42 L 95 54 L 74 56 Z"
+                    fill="url(#eyeGlow)" stroke="#b5f1ff" stroke-width="0.4"/>
+              <path class="suit-eyes" d="M 105 42 L 126 46 L 126 56 L 105 54 Z"
+                    fill="url(#eyeGlow)" stroke="#b5f1ff" stroke-width="0.4"/>
+              <!-- Eye highlight pinpoints (brightest white) -->
+              <line x1="80" y1="48" x2="91" y2="47" stroke="#ffffff" stroke-width="0.8" opacity="1"/>
+              <line x1="109" y1="47" x2="120" y2="48" stroke="#ffffff" stroke-width="0.8" opacity="1"/>
+
+              <!-- Nose ridge (V shape) -->
+              <path d="M 96 64 L 100 68 L 104 64 L 102 76 L 98 76 Z"
+                    fill="rgba(0,40,55,0.55)" stroke="#ffce5e" stroke-width="0.5"/>
+
+              <!-- Mouth grille — horizontal slot with vertical bars -->
+              <path d="M 86 82 L 114 82 L 112 88 L 88 88 Z" fill="rgba(0,15,25,0.7)" stroke="#ffce5e" stroke-width="0.6"/>
+              <line x1="92" y1="82" x2="92" y2="88" stroke="#ffce5e" stroke-width="0.4"/>
+              <line x1="100" y1="82" x2="100" y2="88" stroke="#ffce5e" stroke-width="0.4"/>
+              <line x1="108" y1="82" x2="108" y2="88" stroke="#ffce5e" stroke-width="0.4"/>
+
+              <!-- V-shaped jaw (signature Iron Man chin) -->
+              <path d="M 82 88 L 118 88 L 112 96 Q 100 100 88 96 Z"
+                    fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="0.9"/>
+              <line x1="100" y1="88" x2="100" y2="96" stroke="#66e1ff" stroke-width="0.4" opacity="0.6"/>
+
+              <!-- Faceplate split seam -->
+              <line x1="70" y1="34" x2="130" y2="34" stroke="#ffce5e" stroke-width="0.6" opacity="0.7"/>
+            </g>
+
+            <!-- Cyan neck collar -->
+            <path d="M 88 96 L 112 96 L 114 106 L 86 106 Z" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.9"/>
+            <line x1="92" y1="100" x2="108" y2="100" stroke="#66e1ff" stroke-width="0.4" opacity="0.6"/>
+
+            <!-- ════════════════════ PAULDRONS ════════════════════ -->
+            <!-- LEFT pauldron — GOLD outer cap (signature) -->
+            <path d="M 36 116 Q 24 102 36 92 L 70 96 L 78 124 L 52 134 Q 28 130 36 116 Z"
+                  fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1.3"/>
+            <path d="M 44 100 Q 60 98 70 100 L 72 116 L 50 122 Q 42 112 44 100 Z"
+                  fill="url(#armorHi)" opacity="0.5"/>
+            <!-- Cyan inner overlap -->
+            <path d="M 56 122 L 76 120 L 78 134 L 60 138 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="0.8"/>
+            <!-- Rivet dots -->
+            <circle cx="48" cy="110" r="1.1" fill="#ffce5e"/>
+            <circle cx="58" cy="108" r="1.1" fill="#ffce5e"/>
+            <circle cx="66" cy="108" r="1.1" fill="#ffce5e"/>
+
+            <!-- RIGHT pauldron (mirror) -->
+            <path d="M 164 116 Q 176 102 164 92 L 130 96 L 122 124 L 148 134 Q 172 130 164 116 Z"
+                  fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1.3"/>
+            <path d="M 156 100 Q 140 98 130 100 L 128 116 L 150 122 Q 158 112 156 100 Z"
+                  fill="url(#armorHi)" opacity="0.5"/>
+            <path d="M 144 122 L 124 120 L 122 134 L 140 138 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="0.8"/>
+            <circle cx="152" cy="110" r="1.1" fill="#ffce5e"/>
+            <circle cx="142" cy="108" r="1.1" fill="#ffce5e"/>
+            <circle cx="134" cy="108" r="1.1" fill="#ffce5e"/>
+
+            <!-- ════════════════════ CHEST (iconic hourglass shape) ════════════════════ -->
+            <g class="suit-chest">
+              <!-- GOLD upper pectoral plates — frame the arc reactor -->
+              <!-- LEFT gold pec -->
+              <path d="M 68 106 L 96 108 L 98 128 Q 92 142 78 144 L 66 138 Q 60 122 68 106 Z"
+                    fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1.2"/>
+              <path d="M 70 110 L 92 112 L 92 124 L 70 122 Z" fill="url(#armorHi)" opacity="0.4"/>
+              <!-- RIGHT gold pec -->
+              <path d="M 132 106 L 104 108 L 102 128 Q 108 142 122 144 L 134 138 Q 140 122 132 106 Z"
+                    fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1.2"/>
+              <path d="M 130 110 L 108 112 L 108 124 L 130 122 Z" fill="url(#armorHi)" opacity="0.4"/>
+
+              <!-- CYAN waist/torso (V-taper to arc reactor) -->
+              <path d="M 78 144 L 122 144 L 138 178 Q 130 196 118 198 L 82 198 Q 70 196 62 178 Z"
+                    fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1.2"/>
+
+              <!-- Center sternum strip (between pecs, runs to reactor) -->
+              <path d="M 96 106 L 104 106 L 104 144 L 96 144 Z"
+                    fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.6"/>
+
+              <!-- Abdominal plates (4 segmented strips) -->
+              <path d="M 72 154 L 128 154 L 126 162 L 74 162 Z" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.7"/>
+              <path d="M 74 164 L 126 164 L 124 172 L 76 172 Z" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.7"/>
+              <path d="M 76 174 L 124 174 L 122 182 L 78 182 Z" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.7"/>
+              <path d="M 78 184 L 122 184 L 120 194 L 80 194 Z" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.7"/>
+              <line x1="100" y1="154" x2="100" y2="194" stroke="#66e1ff" stroke-width="0.5" opacity="0.6"/>
+
+              <!-- ════════════════════ TRIANGULAR ARC REACTOR (iconic Mk VI/VII core) ════════════════════ -->
+              <g class="suit-reactor">
+                <!-- Outer triangular housing — pointing UP -->
+                <path d="M 100 110 L 122 146 L 78 146 Z"
+                      fill="#021018" stroke="#66e1ff" stroke-width="1.6"/>
+                <!-- Inner triangle bezel -->
+                <path d="M 100 116 L 117 144 L 83 144 Z"
+                      fill="#031420" stroke="#66e1ff" stroke-width="0.9"/>
+                <!-- Glowing core triangle -->
+                <path class="suit-reactor-tri" d="M 100 122 L 113 141 L 87 141 Z"
+                      fill="url(#reactorCoreGrad)" stroke="#b5f1ff" stroke-width="0.6"/>
+                <!-- Triangle vertex markers -->
+                <circle cx="100" cy="110" r="1.5" fill="#66e1ff"/>
+                <circle cx="122" cy="146" r="1.5" fill="#66e1ff"/>
+                <circle cx="78" cy="146" r="1.5" fill="#66e1ff"/>
+                <!-- Mid notches on edges -->
+                <line x1="111" y1="128" x2="113" y2="131" stroke="#66e1ff" stroke-width="0.7"/>
+                <line x1="89" y1="128" x2="87" y2="131" stroke="#66e1ff" stroke-width="0.7"/>
+                <line x1="92" y1="146" x2="108" y2="146" stroke="#66e1ff" stroke-width="0.6"/>
+                <!-- Brightest white center pulse -->
+                <circle class="suit-reactor-core" cx="100" cy="135" r="4.5" fill="#ffffff"/>
+              </g>
+            </g>
+
+            <!-- ════════════════════ ARMS — LEFT (gold bicep, cyan forearm) ════════════════════ -->
+            <!-- Gold bicep band -->
+            <path d="M 36 134 L 56 130 L 58 154 L 38 158 Z"
+                  fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1.1"/>
+            <path d="M 40 136 L 54 134 L 54 146 L 40 148 Z" fill="url(#armorHi)" opacity="0.45"/>
+            <!-- Bicep band rivet -->
+            <circle cx="47" cy="150" r="1.2" fill="#ffce5e"/>
+            <!-- Elbow joint (cyan) -->
+            <ellipse cx="48" cy="162" rx="11" ry="5" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.8"/>
+            <!-- Forearm gauntlet (cyan) -->
+            <path d="M 38 166 L 58 166 L 60 208 L 40 211 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1.1"/>
+            <path d="M 42 170 L 56 170 L 56 188 L 42 190 Z" fill="url(#armorHi)" opacity="0.4"/>
+            <!-- Vent slits -->
+            <line x1="42" y1="194" x2="56" y2="193" stroke="#66e1ff" stroke-width="0.5"/>
+            <line x1="42" y1="198" x2="56" y2="197" stroke="#66e1ff" stroke-width="0.5"/>
+            <line x1="42" y1="202" x2="56" y2="201" stroke="#66e1ff" stroke-width="0.5"/>
+            <!-- Wrist gold band (signature) -->
+            <rect x="38" y="211" width="22" height="5" fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="0.7"/>
+            <!-- Glove (cyan) -->
+            <path d="M 40 217 L 60 217 L 58 232 Q 50 240 42 232 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1"/>
+            <!-- Knuckle plates -->
+            <line x1="44" y1="219" x2="44" y2="228" stroke="#66e1ff" stroke-width="0.4"/>
+            <line x1="50" y1="219" x2="50" y2="230" stroke="#66e1ff" stroke-width="0.4"/>
+            <line x1="56" y1="219" x2="56" y2="228" stroke="#66e1ff" stroke-width="0.4"/>
+            <!-- PALM REPULSOR (warm amber glow — signature weapon) -->
+            <circle cx="50" cy="228" r="5" fill="#02060d" stroke="#ffce5e" stroke-width="0.8"/>
+            <circle cx="50" cy="228" r="3.5" fill="url(#repulsorGrad)"/>
+            <circle class="suit-repulsor suit-repulsor-l" cx="50" cy="228" r="2" fill="#ffffff"/>
+
+            <!-- ════════════════════ ARMS — RIGHT (mirror) ════════════════════ -->
+            <path d="M 164 134 L 144 130 L 142 154 L 162 158 Z"
+                  fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1.1"/>
+            <path d="M 160 136 L 146 134 L 146 146 L 160 148 Z" fill="url(#armorHi)" opacity="0.45"/>
+            <circle cx="153" cy="150" r="1.2" fill="#ffce5e"/>
+            <ellipse cx="152" cy="162" rx="11" ry="5" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.8"/>
+            <path d="M 162 166 L 142 166 L 140 208 L 160 211 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1.1"/>
+            <path d="M 158 170 L 144 170 L 144 188 L 158 190 Z" fill="url(#armorHi)" opacity="0.4"/>
+            <line x1="158" y1="194" x2="144" y2="193" stroke="#66e1ff" stroke-width="0.5"/>
+            <line x1="158" y1="198" x2="144" y2="197" stroke="#66e1ff" stroke-width="0.5"/>
+            <line x1="158" y1="202" x2="144" y2="201" stroke="#66e1ff" stroke-width="0.5"/>
+            <rect x="140" y="211" width="22" height="5" fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="0.7"/>
+            <path d="M 140 217 L 160 217 L 158 232 Q 150 240 142 232 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1"/>
+            <line x1="144" y1="219" x2="144" y2="228" stroke="#66e1ff" stroke-width="0.4"/>
+            <line x1="150" y1="219" x2="150" y2="230" stroke="#66e1ff" stroke-width="0.4"/>
+            <line x1="156" y1="219" x2="156" y2="228" stroke="#66e1ff" stroke-width="0.4"/>
+            <circle cx="150" cy="228" r="5" fill="#02060d" stroke="#ffce5e" stroke-width="0.8"/>
+            <circle cx="150" cy="228" r="3.5" fill="url(#repulsorGrad)"/>
+            <circle class="suit-repulsor suit-repulsor-r" cx="150" cy="228" r="2" fill="#ffffff"/>
+
+            <!-- ════════════════════ PELVIS / HIP ARMOR (gold belt) ════════════════════ -->
+            <path d="M 62 198 L 138 198 L 134 218 L 66 218 Z"
+                  fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1.2"/>
+            <path d="M 66 200 L 96 202 L 96 210 L 68 212 Z" fill="url(#armorHi)" opacity="0.4"/>
+            <path d="M 134 200 L 104 202 L 104 210 L 132 212 Z" fill="url(#armorHi)" opacity="0.4"/>
+            <line x1="100" y1="198" x2="100" y2="218" stroke="#ffce5e" stroke-width="0.7" opacity="0.8"/>
+            <!-- Hip side armor (cyan accents) -->
+            <path d="M 58 204 L 64 202 L 68 222 L 60 224 Z" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.7"/>
+            <path d="M 142 204 L 136 202 L 132 222 L 140 224 Z" fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="0.7"/>
+
+            <!-- ════════════════════ LEGS — LEFT ════════════════════ -->
+            <!-- Thigh (cyan) -->
+            <path d="M 68 220 L 96 220 L 94 258 L 66 258 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1.2"/>
+            <path d="M 72 222 L 92 222 L 92 248 L 72 248 Z" fill="url(#armorHi)" opacity="0.4"/>
+            <!-- Side stripe -->
+            <line x1="80" y1="220" x2="80" y2="256" stroke="#66e1ff" stroke-width="0.4" opacity="0.5"/>
+            <!-- GOLD knee guard (signature) -->
+            <ellipse cx="80" cy="262" rx="16" ry="7" fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1"/>
+            <circle cx="80" cy="262" r="2.5" fill="#ffffff" opacity="0.9"/>
+            <!-- Shin (cyan) -->
+            <path d="M 68 269 L 94 269 L 92 296 L 70 296 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1.2"/>
+            <path d="M 72 272 L 90 272 L 90 290 L 72 290 Z" fill="url(#armorHi)" opacity="0.4"/>
+            <line x1="74" y1="280" x2="88" y2="280" stroke="#66e1ff" stroke-width="0.4" opacity="0.65"/>
+            <line x1="74" y1="284" x2="88" y2="284" stroke="#66e1ff" stroke-width="0.4" opacity="0.65"/>
+            <line x1="74" y1="288" x2="88" y2="288" stroke="#66e1ff" stroke-width="0.4" opacity="0.65"/>
+            <!-- BOOT (angular toe — signature Iron Man shape) -->
+            <path d="M 66 298 L 94 298 L 100 308 L 96 314 L 62 314 L 60 308 Z"
+                  fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="1.1"/>
+            <!-- Toe highlight -->
+            <path d="M 86 302 L 96 304 L 98 310 L 88 312 Z" fill="rgba(255,170,60,0.4)" stroke="#ffce5e" stroke-width="0.5"/>
+            <!-- Boot jet port -->
+            <circle cx="68" cy="308" r="1.6" fill="#ffce5e" opacity="0.8"/>
+
+            <!-- ════════════════════ LEGS — RIGHT ════════════════════ -->
+            <path d="M 132 220 L 104 220 L 106 258 L 134 258 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1.2"/>
+            <path d="M 128 222 L 108 222 L 108 248 L 128 248 Z" fill="url(#armorHi)" opacity="0.4"/>
+            <line x1="120" y1="220" x2="120" y2="256" stroke="#66e1ff" stroke-width="0.4" opacity="0.5"/>
+            <ellipse cx="120" cy="262" rx="16" ry="7" fill="url(#goldAccent)" stroke="#ffce5e" stroke-width="1"/>
+            <circle cx="120" cy="262" r="2.5" fill="#ffffff" opacity="0.9"/>
+            <path d="M 132 269 L 106 269 L 108 296 L 130 296 Z"
+                  fill="url(#armorGrad)" stroke="#66e1ff" stroke-width="1.2"/>
+            <path d="M 128 272 L 110 272 L 110 290 L 128 290 Z" fill="url(#armorHi)" opacity="0.4"/>
+            <line x1="126" y1="280" x2="112" y2="280" stroke="#66e1ff" stroke-width="0.4" opacity="0.65"/>
+            <line x1="126" y1="284" x2="112" y2="284" stroke="#66e1ff" stroke-width="0.4" opacity="0.65"/>
+            <line x1="126" y1="288" x2="112" y2="288" stroke="#66e1ff" stroke-width="0.4" opacity="0.65"/>
+            <path d="M 134 298 L 106 298 L 100 308 L 104 314 L 138 314 L 140 308 Z"
+                  fill="url(#armorGradDark)" stroke="#66e1ff" stroke-width="1.1"/>
+            <path d="M 114 302 L 104 304 L 102 310 L 112 312 Z" fill="rgba(255,170,60,0.4)" stroke="#ffce5e" stroke-width="0.5"/>
+            <circle cx="132" cy="308" r="1.6" fill="#ffce5e" opacity="0.8"/>
+          </svg>
+        </div>
+
+
+        <!-- Vertical scan beam (sweeps top→bottom) -->
+        <div class="hud-suit-scan" aria-hidden="true"></div>
+
+        <!-- Corner brackets -->
+        <div class="hud-map-corner hud-map-corner-tl"></div>
+        <div class="hud-map-corner hud-map-corner-tr"></div>
+        <div class="hud-map-corner hud-map-corner-bl"></div>
+        <div class="hud-map-corner hud-map-corner-br"></div>
+      </div>
+
+      <dl class="hud-readouts">
+        <div class="hud-readout"><dt>ARMOR</dt><dd>100%</dd></div>
+        <div class="hud-readout"><dt>POWER</dt><dd>8.4 GW</dd></div>
+      </dl>
     </aside>
   </div>
 
@@ -4027,7 +5183,7 @@
 
                 chatArea.scrollTop = chatArea.scrollHeight;
 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await new Promise(resolve => setTimeout(resolve, 25));
               }
 
 
@@ -4273,18 +5429,23 @@
         }, 150);
       }
 
+      // ─── Helper: write to a primary element AND any data-mirror copies ──
+      function writeMirrored(id, value, prop = 'textContent') {
+        const primary = document.getElementById(id);
+        if (primary) primary[prop] = value;
+        document.querySelectorAll(`[data-mirror="${id}"]`).forEach(el => { el[prop] = value; });
+      }
+
       // ─── Live clock + date ──────────────────────────────────────────
       function startClock() {
-        const timeEl = document.getElementById('hudTime');
-        const dateEl = document.getElementById('hudDate');
-        if (!timeEl || !dateEl) return;
+        if (!document.getElementById('hudTime')) return;
         const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
         const days   = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
         const pad = (n) => String(n).padStart(2, '0');
         const tick = () => {
           const d = new Date();
-          timeEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-          dateEl.textContent = `${days[d.getDay()]} ${months[d.getMonth()]} ${pad(d.getDate())} ${d.getFullYear()}`;
+          writeMirrored('hudTime', `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
+          writeMirrored('hudDate', `${days[d.getDay()]} ${months[d.getMonth()]} ${pad(d.getDate())} ${d.getFullYear()}`);
         };
         tick();
         setInterval(tick, 1000);
@@ -4298,21 +5459,23 @@
           { bar: 'netBar', val: 'netVal', base: 58, drift: 28, current: 58 },
         ];
         channels.forEach(c => {
-          const barEl = document.getElementById(c.bar);
-          const valEl = document.getElementById(c.val);
-          if (!barEl || !valEl) return;
+          if (!document.getElementById(c.bar) && !document.querySelector(`[data-mirror="${c.bar}"]`)) return;
           const step = () => {
-            // Smooth bounded random walk
             c.current += (Math.random() - 0.5) * 14;
             const lo = Math.max(4, c.base - c.drift);
             const hi = Math.min(96, c.base + c.drift);
             c.current = Math.max(lo, Math.min(hi, c.current));
             const pct = Math.round(c.current);
-            barEl.style.width = pct + '%';
-            valEl.textContent = pct + '%';
-            // colour shift for high load
-            barEl.classList.toggle('warn', pct >= 70 && pct < 88);
-            barEl.classList.toggle('crit', pct >= 88);
+
+            // Re-query each tick so modal-mirror elements get updates when they appear
+            const barEls = [document.getElementById(c.bar), ...document.querySelectorAll(`[data-mirror="${c.bar}"]`)].filter(Boolean);
+            const valEls = [document.getElementById(c.val), ...document.querySelectorAll(`[data-mirror="${c.val}"]`)].filter(Boolean);
+            barEls.forEach(el => {
+              el.style.width = pct + '%';
+              el.classList.toggle('warn', pct >= 70 && pct < 88);
+              el.classList.toggle('crit', pct >= 88);
+            });
+            valEls.forEach(el => { el.textContent = pct + '%'; });
           };
           step();
           setInterval(step, 1400 + Math.random() * 1100);
@@ -4321,13 +5484,12 @@
 
       // ─── Uptime counter (starts when dashboard mounts) ──────────────
       function startUptime() {
-        const el = document.getElementById('uptimeVal');
-        if (!el) return;
+        if (!document.getElementById('uptimeVal')) return;
         const start = Date.now();
         const pad = (n) => String(n).padStart(2, '0');
         const tick = () => {
           const e = Math.floor((Date.now() - start) / 1000);
-          el.textContent = `${pad(Math.floor(e / 3600))}:${pad(Math.floor((e % 3600) / 60))}:${pad(e % 60)}`;
+          writeMirrored('uptimeVal', `${pad(Math.floor(e / 3600))}:${pad(Math.floor((e % 3600) / 60))}:${pad(e % 60)}`);
         };
         tick();
         setInterval(tick, 1000);
@@ -4349,16 +5511,20 @@
         obs.observe(auth, { attributes: true, attributeFilter: ['class'] });
       }
 
-      // ─── Geolocation acquisition ────────────────────────────────────
+      // ─── Shared geo state (exposed for modal) ───────────────────────
+      const geoState = {
+        lat: null, lng: null, accuracy: null, alt: null,
+        city: null, country: null, timezone: null,
+        acquiredAt: null, status: 'SCANNING'
+      };
+      window.__hudGeoState = geoState;
+
       function acquireGeo() {
         const statusEl = document.getElementById('geoStatus');
-        const latEl    = document.getElementById('geoLat');
-        const lngEl    = document.getElementById('geoLng');
-        const cityEl   = document.getElementById('geoCity');
 
         if (!navigator.geolocation) {
           if (statusEl) { statusEl.textContent = 'NO·GEO'; statusEl.classList.add('error'); }
-          // Show a default world view so the map isn't empty
+          geoState.status = 'NO·GEO';
           initMap(20, 0, 2);
           return;
         }
@@ -4367,28 +5533,40 @@
 
         navigator.geolocation.getCurrentPosition(
           (pos) => {
-            const { latitude, longitude } = pos.coords;
-            const accuracy = pos.coords.accuracy || 0;
-            if (latEl) latEl.textContent = `${Math.abs(latitude).toFixed(4)}° ${latitude >= 0 ? 'N' : 'S'}`;
-            if (lngEl) lngEl.textContent = `${Math.abs(longitude).toFixed(4)}° ${longitude >= 0 ? 'E' : 'W'}`;
+            const { latitude, longitude, accuracy, altitude } = pos.coords;
+            geoState.lat = latitude;
+            geoState.lng = longitude;
+            geoState.accuracy = accuracy || null;
+            geoState.alt = altitude;
+            geoState.acquiredAt = new Date();
+            geoState.status = 'LOCKED';
+            try { geoState.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) {}
+
+            writeMirrored('geoLat', `${Math.abs(latitude).toFixed(4)}° ${latitude >= 0 ? 'N' : 'S'}`);
+            writeMirrored('geoLng', `${Math.abs(longitude).toFixed(4)}° ${longitude >= 0 ? 'E' : 'W'}`);
+
             if (statusEl) {
               statusEl.textContent = 'LOCKED';
               statusEl.classList.remove('scanning', 'error');
               statusEl.classList.add('locked');
             }
-            initMap(latitude, longitude, accuracy < 5000 ? 14 : 12);
-            reverseGeocode(latitude, longitude).then((label) => {
-              if (cityEl && label) cityEl.textContent = label;
+            initMap(latitude, longitude, (accuracy || 0) < 5000 ? 14 : 12);
+            reverseGeocode(latitude, longitude).then((info) => {
+              if (info) {
+                geoState.city = info.label;
+                geoState.country = info.country;
+                writeMirrored('geoCity', info.label);
+              }
             });
           },
           (err) => {
+            geoState.status = err.code === 1 ? 'DENIED' : 'GEO·ERR';
             if (statusEl) {
-              statusEl.textContent = err.code === 1 ? 'DENIED' : 'GEO·ERR';
+              statusEl.textContent = geoState.status;
               statusEl.classList.remove('scanning', 'locked');
               statusEl.classList.add('error');
             }
-            if (cityEl) cityEl.textContent = 'OFFLINE';
-            // Default: render a stylized world-view map so the dashboard still looks alive
+            writeMirrored('geoCity', 'OFFLINE');
             initMap(20, 0, 2);
           },
           { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 }
@@ -4406,7 +5584,7 @@
             const city  = a.city || a.town || a.village || a.hamlet || a.suburb || a.county;
             const region = a.state || a.region || a.country_code?.toUpperCase();
             const out = city ? (region ? `${city}, ${region}` : city) : (region || null);
-            return out ? out.toUpperCase() : null;
+            return out ? { label: out.toUpperCase(), country: a.country || null } : null;
           })
           .catch(() => null);
       }
@@ -4439,6 +5617,7 @@
           fadeAnimation: true,
           zoomAnimation: false
         });
+        window.__hudMap = _map;
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
           maxZoom: 19,
@@ -4493,6 +5672,374 @@
         obs.observe(chatArea, { childList: true });
         evaluate();
       }
+    })();
+  </script>
+
+  <!-- ═══════════════════════════════ HUD MODAL CONTROLLER ═══════════════════════════════ -->
+  <script>
+    (function HUDModal() {
+      'use strict';
+
+      const ready = (fn) => {
+        if (document.readyState !== 'loading') fn();
+        else document.addEventListener('DOMContentLoaded', fn);
+      };
+
+      ready(init);
+
+      let overlay, modalEl, closeBtn, titleEl, subEl, bodyEl;
+      let currentKey = null;
+      let originRect = null;
+
+      function init() {
+        overlay  = document.getElementById('hudModalOverlay');
+        modalEl  = document.getElementById('hudModal');
+        closeBtn = document.getElementById('hudModalClose');
+        titleEl  = document.getElementById('hudModalTitle');
+        subEl    = document.getElementById('hudModalSubtitle');
+        bodyEl   = document.getElementById('hudModalBody');
+
+        if (!overlay || !bodyEl) {
+          console.warn('[HUDModal] required elements missing');
+          return;
+        }
+
+        // ─── Attach click handlers DIRECTLY to each panel (most robust) ───
+        document.querySelectorAll('.hud-panel[data-modal]').forEach((panel) => {
+          panel.addEventListener('click', (e) => {
+            // Don't trigger on the iframe (Spotify) — let its own clicks through
+            if (e.target.tagName === 'IFRAME') return;
+            // Don't re-trigger if modal already open
+            if (overlay.classList.contains('open')) return;
+
+            // Visual ripple feedback at click point
+            spawnRipple(panel, e);
+            // Capture origin rect for zoom-from-position effect
+            originRect = panel.getBoundingClientRect();
+            // Slight panel press feedback
+            panel.classList.add('hud-panel-pressed');
+            setTimeout(() => panel.classList.remove('hud-panel-pressed'), 400);
+
+            openModal(panel.dataset.modal);
+          });
+        });
+
+        // ─── Close handlers ─────────────────────────────────────────────
+        closeBtn?.addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+        });
+      }
+
+      // ─── Ripple effect ──────────────────────────────────────────────
+      function spawnRipple(panel, e) {
+        const rect = panel.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const ripple = document.createElement('span');
+        ripple.className = 'hud-click-ripple';
+        ripple.style.left = x + 'px';
+        ripple.style.top  = y + 'px';
+        panel.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 750);
+      }
+
+      // ─── Open ───────────────────────────────────────────────────────
+      function openModal(key) {
+        currentKey = key;
+        const tpl = templates[key];
+        if (!tpl) { console.warn('[HUDModal] no template for', key); return; }
+
+        titleEl.textContent = tpl.title;
+        subEl.textContent   = tpl.subtitle;
+        bodyEl.innerHTML    = tpl.html();
+
+        // Set zoom-from-origin transform vars if we have a rect
+        if (originRect && modalEl) {
+          const cx = window.innerWidth / 2;
+          const cy = window.innerHeight / 2;
+          const ox = originRect.left + originRect.width / 2;
+          const oy = originRect.top + originRect.height / 2;
+          modalEl.style.setProperty('--origin-dx', `${ox - cx}px`);
+          modalEl.style.setProperty('--origin-dy', `${oy - cy}px`);
+        }
+
+        // Fire mount hook (may move DOM nodes into modal)
+        tpl.afterMount?.();
+
+        // Reveal — RAF to ensure transition fires
+        requestAnimationFrame(() => {
+          overlay.classList.add('open');
+          overlay.setAttribute('aria-hidden', 'false');
+          // Stagger-fade body children in
+          requestAnimationFrame(() => staggerIn());
+        });
+      }
+
+      // ─── Close ──────────────────────────────────────────────────────
+      function closeModal() {
+        const key = currentKey;
+        templates[key]?.beforeUnmount?.();
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        setTimeout(() => {
+          if (!overlay.classList.contains('open')) {
+            bodyEl.innerHTML = '';
+            currentKey = null;
+          }
+        }, 450);
+      }
+
+      // ─── Stagger entry of modal body content ────────────────────────
+      function staggerIn() {
+        const items = bodyEl.querySelectorAll(
+          '.hud-modal-section-title, .hud-modal-data .hud-readout, .hud-modal-clock, .hud-modal-bars .hud-bar, .hud-modal-map-slot, .hud-modal-suit-stage, .hud-modal-spotify-frame, .hud-modal-grid > div > p'
+        );
+        items.forEach((el, i) => {
+          el.classList.add('hud-stagger-item');
+          el.style.animationDelay = `${0.08 + i * 0.04}s`;
+        });
+      }
+
+      // ─── Move helpers ───────────────────────────────────────────────
+      function moveNode(fromId, toContainerSelector) {
+        const node = document.getElementById(fromId);
+        const target = bodyEl.querySelector(toContainerSelector);
+        if (node && target) { target.appendChild(node); return node; }
+        return null;
+      }
+      function moveNodeBack(fromId, toContainerSelector) {
+        const node = document.getElementById(fromId);
+        const target = document.querySelector(toContainerSelector);
+        if (node && target) target.appendChild(node);
+      }
+
+      // ═══════════════ TEMPLATES ═══════════════════════════════════════
+
+      const templates = {
+
+        geo: {
+          title: '◈ GEO·LOCATOR — EXPANDED',
+          subtitle: 'POSITIONAL · CARTOGRAPHIC · DATA',
+          html: () => {
+            const g = window.__hudGeoState || {};
+            const lat = g.lat != null ? `${Math.abs(g.lat).toFixed(6)}° ${g.lat >= 0 ? 'N' : 'S'}` : '—';
+            const lng = g.lng != null ? `${Math.abs(g.lng).toFixed(6)}° ${g.lng >= 0 ? 'E' : 'W'}` : '—';
+            const acc = g.accuracy != null ? `± ${Math.round(g.accuracy)} m` : '—';
+            const alt = g.alt != null ? `${Math.round(g.alt)} m` : 'UNAVAILABLE';
+            const acq = g.acquiredAt ? g.acquiredAt.toLocaleTimeString() : '—';
+            const localTime = new Date().toLocaleTimeString();
+            return `
+              <div class="hud-modal-grid">
+                <div>
+                  <h3 class="hud-modal-section-title">▸ TACTICAL MAP</h3>
+                  <div class="hud-modal-map-slot" id="hudModalMapSlot"></div>
+                </div>
+                <div>
+                  <h3 class="hud-modal-section-title">▸ POSITION DATA</h3>
+                  <dl class="hud-modal-data">
+                    <div class="hud-readout"><dt>STATUS</dt><dd>${g.status || '—'}</dd></div>
+                    <div class="hud-readout"><dt>LATITUDE</dt><dd>${lat}</dd></div>
+                    <div class="hud-readout"><dt>LONGITUDE</dt><dd>${lng}</dd></div>
+                    <div class="hud-readout"><dt>ACCURACY</dt><dd>${acc}</dd></div>
+                    <div class="hud-readout"><dt>ALTITUDE</dt><dd>${alt}</dd></div>
+                    <div class="hud-readout"><dt>CITY</dt><dd>${g.city || '—'}</dd></div>
+                    <div class="hud-readout"><dt>COUNTRY</dt><dd>${(g.country || '—').toUpperCase()}</dd></div>
+                    <div class="hud-readout"><dt>TIMEZONE</dt><dd>${g.timezone || '—'}</dd></div>
+                    <div class="hud-readout"><dt>LOCAL TIME</dt><dd>${localTime}</dd></div>
+                    <div class="hud-readout"><dt>ACQUIRED AT</dt><dd>${acq}</dd></div>
+                  </dl>
+                </div>
+              </div>`;
+          },
+          afterMount: () => {
+            moveNode('geoMap', '#hudModalMapSlot');
+            setTimeout(() => {
+              if (window.__hudMap) try { window.__hudMap.invalidateSize(); } catch(e){}
+            }, 120);
+          },
+          beforeUnmount: () => {
+            moveNodeBack('geoMap', '.hud-map-frame');
+            setTimeout(() => {
+              if (window.__hudMap) try { window.__hudMap.invalidateSize(); } catch(e){}
+            }, 120);
+          }
+        },
+
+        sys: {
+          title: '◈ SYS·METRICS — EXPANDED',
+          subtitle: 'SYSTEM · TELEMETRY · DIAGNOSTICS',
+          html: () => {
+            const ua = navigator.userAgent || '';
+            const platform = navigator.platform || 'UNKNOWN';
+            const lang = (navigator.language || 'en').toUpperCase();
+            const cores = navigator.hardwareConcurrency || '—';
+            const mem = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : '—';
+            const conn = navigator.connection?.effectiveType?.toUpperCase() || '—';
+            const downlink = navigator.connection?.downlink ? `${navigator.connection.downlink} Mb/s` : '—';
+            const screenRes = `${screen.width}×${screen.height}`;
+            const viewportRes = `${window.innerWidth}×${window.innerHeight}`;
+            const browser = (() => {
+              if (/Edg\//.test(ua)) return 'EDGE';
+              if (/Chrome\//.test(ua)) return 'CHROME';
+              if (/Firefox\//.test(ua)) return 'FIREFOX';
+              if (/Safari\//.test(ua)) return 'SAFARI';
+              return 'UNKNOWN';
+            })();
+            return `
+              <div class="hud-modal-clock">
+                <div class="hud-modal-clock-time" data-mirror="hudTime">--:--:--</div>
+                <div class="hud-modal-clock-date" data-mirror="hudDate">--- --- -- ----</div>
+              </div>
+              <div class="hud-modal-grid">
+                <div>
+                  <h3 class="hud-modal-section-title">▸ LIVE TELEMETRY</h3>
+                  <div class="hud-modal-bars">
+                    <div class="hud-bar">
+                      <div class="hud-bar-head"><span>CPU·LOAD</span><span data-mirror="cpuVal">--%</span></div>
+                      <div class="hud-bar-track"><div class="hud-bar-fill" data-mirror="cpuBar"></div></div>
+                    </div>
+                    <div class="hud-bar">
+                      <div class="hud-bar-head"><span>MEMORY</span><span data-mirror="memVal">--%</span></div>
+                      <div class="hud-bar-track"><div class="hud-bar-fill" data-mirror="memBar"></div></div>
+                    </div>
+                    <div class="hud-bar">
+                      <div class="hud-bar-head"><span>NETWORK</span><span data-mirror="netVal">--%</span></div>
+                      <div class="hud-bar-track"><div class="hud-bar-fill" data-mirror="netBar"></div></div>
+                    </div>
+                  </div>
+                  <dl class="hud-modal-data" style="margin-top:16px;">
+                    <div class="hud-readout"><dt>UPTIME</dt><dd data-mirror="uptimeVal">00:00:00</dd></div>
+                    <div class="hud-readout"><dt>STATUS</dt><dd style="color:var(--hud-green);">NOMINAL</dd></div>
+                  </dl>
+                </div>
+                <div>
+                  <h3 class="hud-modal-section-title">▸ HOST DIAGNOSTICS</h3>
+                  <dl class="hud-modal-data">
+                    <div class="hud-readout"><dt>BROWSER</dt><dd>${browser}</dd></div>
+                    <div class="hud-readout"><dt>PLATFORM</dt><dd>${platform.toUpperCase()}</dd></div>
+                    <div class="hud-readout"><dt>LANGUAGE</dt><dd>${lang}</dd></div>
+                    <div class="hud-readout"><dt>CPU CORES</dt><dd>${cores}</dd></div>
+                    <div class="hud-readout"><dt>DEVICE·MEM</dt><dd>${mem}</dd></div>
+                    <div class="hud-readout"><dt>CONNECTION</dt><dd>${conn}</dd></div>
+                    <div class="hud-readout"><dt>DOWNLINK</dt><dd>${downlink}</dd></div>
+                    <div class="hud-readout"><dt>SCREEN</dt><dd>${screenRes}</dd></div>
+                    <div class="hud-readout"><dt>VIEWPORT</dt><dd>${viewportRes}</dd></div>
+                    <div class="hud-readout"><dt>ONLINE</dt><dd>${navigator.onLine ? 'TRUE' : 'FALSE'}</dd></div>
+                  </dl>
+                </div>
+              </div>`;
+          }
+        },
+
+        spotify: {
+          title: '◈ AUDIO·STREAM — EXPANDED',
+          subtitle: 'PLAYLIST · STREAMING · CONTROLS',
+          html: () => `
+            <div class="hud-modal-grid">
+              <div style="grid-column: 1 / -1;">
+                <h3 class="hud-modal-section-title">▸ NOW PLAYING</h3>
+                <div class="hud-modal-spotify-frame" id="hudModalSpotifyFrame"></div>
+              </div>
+              <div>
+                <h3 class="hud-modal-section-title">▸ STREAM·INFO</h3>
+                <dl class="hud-modal-data">
+                  <div class="hud-readout"><dt>SOURCE</dt><dd>SPOTIFY</dd></div>
+                  <div class="hud-readout"><dt>FREQUENCY</dt><dd>44.1 kHz</dd></div>
+                  <div class="hud-readout"><dt>BITRATE</dt><dd>320 kb/s</dd></div>
+                  <div class="hud-readout"><dt>CODEC</dt><dd>OGG·VORBIS</dd></div>
+                  <div class="hud-readout"><dt>STATUS</dt><dd style="color:#1dd75f;">▶ LIVE</dd></div>
+                </dl>
+              </div>
+              <div>
+                <h3 class="hud-modal-section-title">▸ NOTES</h3>
+                <p style="font-size:12px;line-height:1.7;color:var(--text-secondary);margin:0;">
+                  Full playback controls available. Log in to Spotify in this browser for unrestricted listening; otherwise 30-second previews per track.
+                </p>
+              </div>
+            </div>`,
+          afterMount: () => {
+            const iframe = document.querySelector('.hud-spotify-frame .hud-spotify-iframe');
+            const target = bodyEl.querySelector('#hudModalSpotifyFrame');
+            if (iframe && target) {
+              iframe.style.height = '352px';
+              iframe.setAttribute('height', '352');
+              target.appendChild(iframe);
+            }
+          },
+          beforeUnmount: () => {
+            const iframe = document.querySelector('#hudModalSpotifyFrame .hud-spotify-iframe')
+                        || bodyEl?.querySelector('.hud-spotify-iframe');
+            const target = document.querySelector('.hud-spotify-frame');
+            if (iframe && target) {
+              iframe.style.height = '152px';
+              iframe.setAttribute('height', '152');
+              target.appendChild(iframe);
+            }
+          }
+        },
+
+        suit: {
+          title: '◈ MK·VII ARMOR — EXPANDED SCHEMATIC',
+          subtitle: 'STRUCTURAL · COMBAT · POWER SYSTEMS',
+          html: () => {
+            const sourceFig = document.querySelector('.hud-suit-fig');
+            const svgMarkup = sourceFig ? sourceFig.querySelector('svg').outerHTML : '';
+            return `
+              <div class="hud-modal-grid">
+                <div>
+                  <h3 class="hud-modal-section-title">▸ FULL SCHEMATIC</h3>
+                  <div class="hud-modal-suit-stage">
+                    <div class="hud-suit-ring hud-suit-ring-1"></div>
+                    <div class="hud-suit-ring hud-suit-ring-2"></div>
+                    <div class="hud-suit-ring hud-suit-ring-3"></div>
+                    <div class="hud-suit-fig">${svgMarkup}</div>
+                    <div class="hud-suit-scan"></div>
+                    <div class="hud-suit-bootup"></div>
+                  </div>
+                </div>
+                <div>
+                  <h3 class="hud-modal-section-title">▸ ARMOR INTEGRITY</h3>
+                  <div class="hud-modal-bars" style="margin-bottom: 18px;">
+                    <div class="hud-bar">
+                      <div class="hud-bar-head"><span>STRUCTURAL</span><span>100%</span></div>
+                      <div class="hud-bar-track"><div class="hud-bar-fill" style="width:100%;"></div></div>
+                    </div>
+                    <div class="hud-bar">
+                      <div class="hud-bar-head"><span>POWER CELL</span><span>98%</span></div>
+                      <div class="hud-bar-track"><div class="hud-bar-fill" style="width:98%;"></div></div>
+                    </div>
+                    <div class="hud-bar">
+                      <div class="hud-bar-head"><span>REPULSORS</span><span>92%</span></div>
+                      <div class="hud-bar-track"><div class="hud-bar-fill" style="width:92%;"></div></div>
+                    </div>
+                    <div class="hud-bar">
+                      <div class="hud-bar-head"><span>FLIGHT·SYS</span><span>87%</span></div>
+                      <div class="hud-bar-track"><div class="hud-bar-fill" style="width:87%;"></div></div>
+                    </div>
+                  </div>
+
+                  <h3 class="hud-modal-section-title">▸ SPECIFICATIONS</h3>
+                  <dl class="hud-modal-data">
+                    <div class="hud-readout"><dt>MARK</dt><dd>VII</dd></div>
+                    <div class="hud-readout"><dt>ALLOY</dt><dd>GOLD·TITANIUM</dd></div>
+                    <div class="hud-readout"><dt>WEIGHT</dt><dd>~210 LB</dd></div>
+                    <div class="hud-readout"><dt>POWER</dt><dd>8.4 GW</dd></div>
+                    <div class="hud-readout"><dt>ARC·CORE</dt><dd>PALLADIUM-FREE</dd></div>
+                    <div class="hud-readout"><dt>MAX·SPEED</dt><dd>MACH 3.1</dd></div>
+                    <div class="hud-readout"><dt>MAX·ALTITUDE</dt><dd>62,000 FT</dd></div>
+                    <div class="hud-readout"><dt>HUD</dt><dd>JARVIS·LINKED</dd></div>
+                    <div class="hud-readout"><dt>DEPLOYMENT</dt><dd>SUITCASE·MK</dd></div>
+                    <div class="hud-readout"><dt>STATUS</dt><dd style="color:var(--hud-green);">COMBAT READY</dd></div>
+                  </dl>
+                </div>
+              </div>`;
+          }
+        }
+      };
     })();
   </script>
 </body>
